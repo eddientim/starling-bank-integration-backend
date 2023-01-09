@@ -1,4 +1,4 @@
-package domain;
+package starlingtechchallenge.domain;
 
 import java.util.List;
 import lombok.AllArgsConstructor;

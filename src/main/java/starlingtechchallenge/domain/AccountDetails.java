@@ -1,4 +1,4 @@
-package domain;
+package starlingtechchallenge.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
