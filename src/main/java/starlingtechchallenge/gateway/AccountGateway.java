@@ -5,8 +5,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.reactive.function.client.WebClient;
 import starlingtechchallenge.domain.Account;
@@ -40,8 +43,12 @@ public class AccountGateway {
           .bodyToMono(String.class)
           .map(this::transformToResponse)
           .block();
-    } catch (RestClientException ex) {
-      throw new RestClientException("Unable to retrieve account info");
+    } catch (HttpClientErrorException ex) {
+      throw new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to retrieve account info");
+    } catch (ResourceAccessException ex) {
+      throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Invalid request made");
+    } catch (Exception ex) {
+      throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Invalid url does not exist");
     }
   }
 
