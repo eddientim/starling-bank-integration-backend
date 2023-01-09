@@ -12,7 +12,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.HttpClientErrorException;
 import starlingtechchallenge.domain.Account;
 
 @SpringBootTest
@@ -43,4 +45,16 @@ public class AccountGatewayTest {
         .andExpect(status().isOk());
 
   }
+  @Test
+  public void shouldThrow4xxErrorWhenAccountUrlIsInvalid() throws Exception {
+    when(accountGateway.retrieveCustomerAccounts()).thenThrow(new HttpClientErrorException(
+        HttpStatus.BAD_REQUEST, "Invalid request made"));
+
+    mockMvc.perform(get(BASE_URL)
+            .contentType(APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, BEARER)
+            .accept(APPLICATION_JSON))
+        .andExpect(status().is4xxClientError());
+  }
+
 }
