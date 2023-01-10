@@ -5,11 +5,11 @@
 
 ### Environment variables 
 The following env variables need to be setup. The `bearer_token` can be found by generating a refresh token user in sandbox. 
-You can set this in your `.zsh ``.bash_file` or create a `.env ` file and include the variables in there.
+You can set this in your `.zsh` `.bash_file` or create a `.env ` file and include the variables in there.
 
 The `sandbox_api` can be found here - https://developer.starlingbank.com/docs
 ```
-exort STARLING_BANK_API=<Sandbox_api>
+export STARLING_BANK_API=<Sandbox_api>
 
 export BEARER_TOKEN=<Your_bearer_token>
 ```
