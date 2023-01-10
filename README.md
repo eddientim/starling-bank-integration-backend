@@ -9,9 +9,9 @@ You can set this in your `.zsh` `.bash_file` or create a `.env ` file and includ
 
 The `sandbox_api` can be found here - https://developer.starlingbank.com/docs
 ```
-export STARLING_BANK_API=<Sandbox_api>
+export STARLING_BANK_API=<sandbox_api>
 
-export BEARER_TOKEN=<Your_bearer_token>
+export BEARER_TOKEN=<your_bearer_token>
 ```
 For .env file variable setup
 
