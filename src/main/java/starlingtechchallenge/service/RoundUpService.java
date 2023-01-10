@@ -2,7 +2,6 @@ package starlingtechchallenge.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import starlingtechchallenge.NoAccountException;
 import starlingtechchallenge.domain.Account;
 import starlingtechchallenge.domain.Amount;
 import starlingtechchallenge.domain.TransactionFeed;
