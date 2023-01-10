@@ -7,7 +7,7 @@
 The following env variables need to be setup. The `bearer_token` can be found by generating a refresh token user in sandbox. 
 You can set this in your `.zsh ``.bash_file` or create a `.env ` file and include the variables in there.
 
-The `Sandbox_api` can be found here - https://developer.starlingbank.com/docs
+The `sandbox_api` can be found here - https://developer.starlingbank.com/docs
 ```
 exort STARLING_BANK_API=<Sandbox_api>
 
@@ -16,9 +16,9 @@ export BEARER_TOKEN=<Your_bearer_token>
 For .env file variable setup
 
 ``` 
-STARLING_BANK_API=<Sandbox_api>
+STARLING_BANK_API=<sandbox_api>
 
-BEARER_TOKEN=<Your_bearer_token>
+BEARER_TOKEN=<your_bearer_token>
 ```
 
 ### Set up & Build
@@ -44,3 +44,4 @@ If the user has made transactions in two different countries the conversion rate
 
 I would include logs for better visibility when the service is running.
 
+Happy to have a discussion about service design and different approaches to the task.
