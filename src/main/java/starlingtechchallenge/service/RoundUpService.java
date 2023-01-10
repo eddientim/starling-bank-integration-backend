@@ -32,7 +32,7 @@ public class RoundUpService {
     if (!accounts.getAccounts().isEmpty()) {
       final String categoryUid = accounts.getAccounts().get(0).getDefaultCategory();
       TransactionFeed transactions = transactionFeedGateway.getTransactionFeed(accountUid, categoryUid, changesSince);
-      final Amount amount = calculate(List.of(transactions));
+      final Amount amount = calculateRoundUpForOutGoingTransactions(List.of(transactions));
       GoalAmountRequest request = GoalAmountRequest.builder().amount(amount).build();
 
       return savingsGoalGateway.addSavingsToGoal(accountUid, savingsGoalUid, request);
@@ -41,7 +41,7 @@ public class RoundUpService {
     return AddToSavingsGoalResponse.builder().build();
   }
 
-  private Amount calculate(List<TransactionFeed> transactions) {
+  private Amount calculateRoundUpForOutGoingTransactions(List<TransactionFeed> transactions) {
     final int sum = transactions.stream()
         .filter(item -> item.getFeedItems().get(0).getDirection().equals("OUT"))
         .mapToInt(item -> item.getFeedItems().get(0).getAmount().getMinorUnits())

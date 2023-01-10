@@ -86,13 +86,34 @@ public class RoundUpServiceTest {
   public void shouldNotCalculateRoundUpIfAmountEqualsZero() {
     Account accountResponse = getAccountData();
 
-    when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountResponse);
-
     var transactionFeedResponse = TransactionFeed.builder()
         .feedItems(List.of(Transaction.builder()
             .sourceAmount(SourceAmount.builder().currency("GBP").minorUnits(0).build())
             .categoryUid(defaultCategoryUid).direction("OUT").amount(
                 Amount.builder().currency("GBP").minorUnits(0).build()).build())).build();
+
+    when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountResponse);
+
+    when(transactionFeedGateway.getTransactionFeed(accountUid, defaultCategoryUid,
+        String.valueOf(changesSince))).thenReturn(transactionFeedResponse);
+
+    roundUpService.calculateRoundUp(accountUid, savingsGoalUid, String.valueOf(changesSince));
+
+    verifyNoInteractions(savingsGoalGateway);
+
+  }
+
+  @Test
+  public void shouldNotCalculateRoundUpForNonOutGoingTransactions() {
+    Account accountResponse = getAccountData();
+
+    when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountResponse);
+
+    var transactionFeedResponse = TransactionFeed.builder()
+        .feedItems(List.of(Transaction.builder()
+            .sourceAmount(SourceAmount.builder().currency("GBP").minorUnits(75).build())
+            .categoryUid(defaultCategoryUid).direction("IN").amount(
+                Amount.builder().currency("GBP").minorUnits(25).build()).build())).build();
 
     AddToSavingsGoalResponse result = roundUpService
         .calculateRoundUp(accountUid, savingsGoalUid, String.valueOf(changesSince));
