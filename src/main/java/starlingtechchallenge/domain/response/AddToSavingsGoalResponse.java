@@ -1,11 +1,13 @@
 package starlingtechchallenge.domain.response;
 
-import java.util.List;
+import lombok.Builder;
 import lombok.Data;
-import starlingtechchallenge.domain.AllSavingsGoalDetails;
 
 @Data
+@Builder
 public class AddToSavingsGoalResponse {
-  private List<AllSavingsGoalDetails> savingsGoalList;
+
+  private String transferUid;
+  private boolean success;
 
 }

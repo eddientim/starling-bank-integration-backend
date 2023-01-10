@@ -6,6 +6,7 @@ import starlingtechchallenge.domain.AccountDetails;
 import starlingtechchallenge.domain.Amount;
 import starlingtechchallenge.domain.Transaction;
 import starlingtechchallenge.domain.TransactionFeed;
+import starlingtechchallenge.domain.response.AddToSavingsGoalResponse;
 
 public class DataBuilders {
 
@@ -25,4 +26,9 @@ public class DataBuilders {
         .feedItems(List.of(Transaction.builder().categoryUid(CATEGORY_UID).direction("OUT").amount(
             Amount.builder().currency("GBP").minorUnits(34).build()).build())).build();
   }
+
+  public static AddToSavingsGoalResponse getAddToSavingsGoalData() {
+    return AddToSavingsGoalResponse.builder().transferUid("some-transfer-uid").build();
+  }
+
 }
