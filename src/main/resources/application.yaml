@@ -3,7 +3,7 @@ spring:
     name: starling-tech-challenge
 
 endpoint:
-  starling-url: ${STARLING_ACCOUNTS_URL}
+  starling-url: ${STARLING_URL}
 
 starling:
   bearer-token: ${BEARER_TOKEN}
