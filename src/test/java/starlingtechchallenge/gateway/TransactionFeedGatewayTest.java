@@ -23,11 +23,11 @@ import starlingtechchallenge.domain.TransactionFeed;
 @AutoConfigureMockMvc
 class TransactionFeedGatewayTest {
 
-  private static final String BASE_URL = "http://localhost/api/v2/feed/";
-  private static final String BEARER = "mock-bearer";
-  private static final String ACCOUNT_UID = "some-account-uid";
+  private final String BASE_URL = "http://localhost/api/v2/feed/";
+  private final String BEARER = "mock-bearer";
+  private final String ACCOUNT_UID = "some-account-uid";
 
-  private static final String CATEGORY_UID = "some-category-uid";
+  private final String CATEGORY_UID = "some-category-uid";
   @Autowired
   MockMvc mockMvc;
 
