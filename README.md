@@ -42,7 +42,7 @@ A savings goal must to be created hence the `savingsGoalUid` within the path par
 ### Architecture
 Sequence diagram of service flow
 
-![Sequence diagram](src/main/architecture/Sequence%20diagram%20.png)
+![Sequence diagram](architecture/Sequence diagram.png)
 
 ### Further improvements 
 
