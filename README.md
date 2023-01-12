@@ -24,10 +24,10 @@ BEARER_TOKEN=<your_bearer_token>
 ### Set up & Build
 
 Install maven dependencies
-- `mvn install` or you can start the application from `main` class by clicking the play green button. 
+- `mvn install` 
 
 The service can be run with
-- `mvn run`
+- `mvn spring-boot:run` or you can start the application from `main` class by clicking the play green button. 
 
 Tests can be run with 
 - `mvn test`
