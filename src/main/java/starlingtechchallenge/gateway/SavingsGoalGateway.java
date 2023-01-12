@@ -1,6 +1,5 @@
 package starlingtechchallenge.gateway;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
@@ -32,8 +31,7 @@ public class SavingsGoalGateway {
     public SavingsGoalGateway(@Value("${endpoint.starling-url}") final String baseurl,
                               RestTemplateBuilder restTemplateBuilder) {
         this.baseurl = baseurl;
-        restTemplate = restTemplateBuilder
-                .build();
+        restTemplate = restTemplateBuilder.build();
     }
 
     public AddToSavingsGoalResponse addSavingsToGoal(final String accountUid, final String savingsGoalUid, final Amount amount) {

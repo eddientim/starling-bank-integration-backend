@@ -51,7 +51,7 @@ public class AccountGatewayTest {
     }
 
     @Test
-    void shouldThrowA5xxErrorARequest() {
+    void shouldThrowA5xxErrorWhenRetrievingAccountInformation() {
         mockRestServiceServer.expect(requestTo(any(String.class))).andRespond(withBadRequest());
 
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
@@ -62,7 +62,7 @@ public class AccountGatewayTest {
     }
 
     @Test
-    void shouldThrow4xxErrorForARequest() {
+    void shouldThrowA4xxErrorWhenRetrievingAccountInformation() {
         mockRestServiceServer.expect(requestTo(any(String.class))).andRespond(withServerError());
 
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
