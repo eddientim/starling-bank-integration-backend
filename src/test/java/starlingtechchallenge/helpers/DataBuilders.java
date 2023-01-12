@@ -34,6 +34,6 @@ public class DataBuilders {
   }
 
   public static AddToSavingsGoalResponse getAddToSavingsGoalData() {
-    return AddToSavingsGoalResponse.builder().transferUid("some-transfer-uid").build();
+    return AddToSavingsGoalResponse.builder().transferUid("some-transfer-uid").success(true).build();
   }
 }
