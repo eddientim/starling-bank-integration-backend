@@ -6,7 +6,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
@@ -16,7 +16,7 @@ import starlingtechchallenge.domain.Account;
 import static org.springframework.http.HttpMethod.GET;
 import static starlingtechchallenge.utils.StarlingHeaders.getStarlingHeaders;
 
-@Service
+@Component
 public class AccountGateway {
 
     private final RestTemplate restTemplate;

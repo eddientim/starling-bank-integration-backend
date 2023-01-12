@@ -25,7 +25,6 @@ import static starlingtechchallenge.helpers.DataBuilders.getAccountData;
 @ExtendWith(SpringExtension.class)
 @RestClientTest(AccountGateway.class)
 @ActiveProfiles("test")
-
 public class AccountGatewayTest {
 
     @Autowired
