@@ -1,128 +1,100 @@
 package starlingtechchallenge.service;
 
-import static java.util.Collections.emptyList;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
-import static starlingtechchallenge.helpers.DataBuilders.getAccountData;
-import static starlingtechchallenge.helpers.DataBuilders.getTransactionFeedData;
-
-import java.time.Instant;
-import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import starlingtechchallenge.domain.Account;
+import starlingtechchallenge.domain.AccountDetails;
 import starlingtechchallenge.domain.Amount;
-import starlingtechchallenge.domain.SourceAmount;
-import starlingtechchallenge.domain.Transaction;
 import starlingtechchallenge.domain.TransactionFeed;
-import starlingtechchallenge.domain.request.GoalAmountRequest;
 import starlingtechchallenge.domain.response.AddToSavingsGoalResponse;
 import starlingtechchallenge.gateway.AccountGateway;
 import starlingtechchallenge.gateway.SavingsGoalGateway;
 import starlingtechchallenge.gateway.TransactionFeedGateway;
 
-@SpringBootTest
+import java.time.Instant;
+import java.util.List;
 
+import static java.util.Collections.emptyList;
+import static org.mockito.Mockito.*;
+import static starlingtechchallenge.helpers.DataBuilders.getAccountData;
+import static starlingtechchallenge.helpers.DataBuilders.getTransactionFeedData;
+
+@SpringBootTest
 public class RoundUpServiceTest {
 
-  private final String accountUid = "some-account-uid";
-  private final String savingsGoalUid = "some-saving-goal-uid";
-  private final String defaultCategoryUid = "some-category-uid";
-  private final GoalAmountRequest roundUpAmount = GoalAmountRequest.builder().amount(Amount.builder().currency("GBP").minorUnits(75).build()).build();
+    private final String accountUid = "some-account-uid";
+    private final String savingsGoalUid = "some-saving-goal-uid";
+    private final String defaultCategoryUid = "some-category-uid";
+    private final Amount roundUpAmount = Amount.builder().currency("GBP").minorUnits(75).build();
 
-  private final Instant changesSince = Instant.now();
+    private final Instant changesSince = Instant.now();
 
-  @Mock
-  private AccountGateway accountGateway;
+    final Account accountResponse = getAccountData();
 
-  @Mock
-  private TransactionFeedGateway transactionFeedGateway;
+    final TransactionFeed transactionFeedResponse = getTransactionFeedData();
 
-  @Mock
-  private SavingsGoalGateway savingsGoalGateway;
+    @Mock
+    private AccountGateway accountGateway;
 
-  @InjectMocks
-  private RoundUpService roundUpService;
+    @Mock
+    private TransactionFeedGateway transactionFeedGateway;
 
-  @Test
-  public void shouldCalculateRoundUpForOutGoingTransactions() {
-    Account accountResponse = getAccountData();
+    @Mock
+    private SavingsGoalGateway savingsGoalGateway;
 
-    TransactionFeed transactionFeedResponse = getTransactionFeedData();
+    @InjectMocks
+    private RoundUpService roundUpService;
 
-    when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountResponse);
+    @Test
+    public void shouldCalculateRoundUpForOutGoingTransactions() {
 
-    when(transactionFeedGateway.getTransactionFeed(accountUid, defaultCategoryUid,
-        String.valueOf(changesSince))).thenReturn(transactionFeedResponse);
+        when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountResponse);
 
-    roundUpService.calculateRoundUp(accountUid, savingsGoalUid, String.valueOf(changesSince));
+        when(transactionFeedGateway.getTransactionFeed(accountUid, defaultCategoryUid,
+                String.valueOf(changesSince))).thenReturn(transactionFeedResponse);
 
-    verify(transactionFeedGateway)
-        .getTransactionFeed(accountUid, defaultCategoryUid, String.valueOf(changesSince));
+        roundUpService.calculateRoundUp(accountUid, savingsGoalUid, String.valueOf(changesSince));
 
-    verify(savingsGoalGateway).addSavingsToGoal(accountUid, savingsGoalUid, roundUpAmount);
-  }
+        verify(transactionFeedGateway)
+                .getTransactionFeed(accountUid, defaultCategoryUid, String.valueOf(changesSince));
 
-  @Test
-  void shouldNotCalculateRoundUpForZeroAccounts() {
-    Account accountResponse = Account.builder().accounts(emptyList()).build();
+        verify(savingsGoalGateway).addSavingsToGoal(accountUid, savingsGoalUid, roundUpAmount);
+    }
 
-    when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountResponse);
+    @Test
+    public void shouldCalculateRoundUpForMultipleAccounts() {
 
-    AddToSavingsGoalResponse result = roundUpService
-        .calculateRoundUp(accountUid, savingsGoalUid, String.valueOf(changesSince));
+        AccountDetails account = AccountDetails.builder().defaultCategory(defaultCategoryUid).build();
+        Account multipleAccounts = Account.builder().accounts(List.of(account, account)).build();
 
-    verifyNoInteractions(transactionFeedGateway);
-    verifyNoInteractions(savingsGoalGateway);
+        when(accountGateway.retrieveCustomerAccounts()).thenReturn(multipleAccounts);
 
-    Assertions.assertFalse(result.isSuccess());
-  }
+        when(transactionFeedGateway.getTransactionFeed(accountUid, defaultCategoryUid,
+                String.valueOf(changesSince))).thenReturn(transactionFeedResponse);
 
-  @Test
-  public void shouldNotCalculateRoundUpIfAmountEqualsZero() {
-    Account accountResponse = getAccountData();
+        roundUpService.calculateRoundUp(accountUid, savingsGoalUid, String.valueOf(changesSince));
 
-    var transactionFeedResponse = TransactionFeed.builder()
-        .feedItems(List.of(Transaction.builder()
-            .sourceAmount(SourceAmount.builder().currency("GBP").minorUnits(0).build())
-            .categoryUid(defaultCategoryUid).direction("OUT").amount(
-                Amount.builder().currency("GBP").minorUnits(0).build()).build())).build();
+        verify(transactionFeedGateway)
+                .getTransactionFeed(accountUid, defaultCategoryUid, String.valueOf(changesSince));
 
-    when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountResponse);
+        verify(savingsGoalGateway).addSavingsToGoal(accountUid, savingsGoalUid, roundUpAmount);
+    }
 
-    when(transactionFeedGateway.getTransactionFeed(accountUid, defaultCategoryUid,
-        String.valueOf(changesSince))).thenReturn(transactionFeedResponse);
+    @Test
+    void shouldNotCalculateRoundUpWhenAccountDoesNotExist() {
+        Account accountResponse = Account.builder().accounts(emptyList()).build();
 
-    roundUpService.calculateRoundUp(accountUid, savingsGoalUid, String.valueOf(changesSince));
+        when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountResponse);
 
-    verifyNoInteractions(savingsGoalGateway);
+        AddToSavingsGoalResponse result = roundUpService
+                .calculateRoundUp(accountUid, savingsGoalUid, String.valueOf(changesSince));
 
-  }
+        verifyNoInteractions(transactionFeedGateway);
+        verifyNoInteractions(savingsGoalGateway);
 
-  @Test
-  public void shouldNotCalculateRoundUpForNonOutGoingTransactions() {
-    Account accountResponse = getAccountData();
-
-    when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountResponse);
-
-    var transactionFeedResponse = TransactionFeed.builder()
-        .feedItems(List.of(Transaction.builder()
-            .sourceAmount(SourceAmount.builder().currency("GBP").minorUnits(75).build())
-            .categoryUid(defaultCategoryUid).direction("IN").amount(
-                Amount.builder().currency("GBP").minorUnits(25).build()).build())).build();
-
-    AddToSavingsGoalResponse result = roundUpService
-        .calculateRoundUp(accountUid, savingsGoalUid, String.valueOf(changesSince));
-
-    when(transactionFeedGateway.getTransactionFeed(accountUid, defaultCategoryUid,
-        String.valueOf(changesSince))).thenReturn(transactionFeedResponse);
-
-    verifyNoInteractions(savingsGoalGateway);
-
-    Assertions.assertFalse(result.isSuccess());
-  }
+        Assertions.assertFalse(result.isSuccess());
+    }
 }

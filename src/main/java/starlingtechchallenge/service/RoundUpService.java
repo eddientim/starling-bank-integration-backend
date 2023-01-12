@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import starlingtechchallenge.domain.Account;
 import starlingtechchallenge.domain.Amount;
 import starlingtechchallenge.domain.TransactionFeed;
-import starlingtechchallenge.domain.request.GoalAmountRequest;
 import starlingtechchallenge.domain.response.AddToSavingsGoalResponse;
 import starlingtechchallenge.gateway.AccountGateway;
 import starlingtechchallenge.gateway.SavingsGoalGateway;
@@ -32,9 +31,8 @@ public class RoundUpService {
       final String categoryUid = accounts.getAccounts().get(0).getDefaultCategory();
       TransactionFeed transactions = transactionFeedGateway.getTransactionFeed(accountUid, categoryUid, changesSince);
       final Amount amount = calculateRoundUpForOutGoingTransactions(List.of(transactions));
-      GoalAmountRequest request = GoalAmountRequest.builder().amount(amount).build();
 
-      return savingsGoalGateway.addSavingsToGoal(accountUid, savingsGoalUid, request);
+      return savingsGoalGateway.addSavingsToGoal(accountUid, savingsGoalUid, amount);
     }
 
     return AddToSavingsGoalResponse.builder().build();
