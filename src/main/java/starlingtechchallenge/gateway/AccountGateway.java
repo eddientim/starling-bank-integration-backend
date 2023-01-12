@@ -21,11 +21,11 @@ public class AccountGateway {
 
     private final RestTemplate restTemplate;
 
-    @Value("${endpoint.starling-url}")
-    private String baseurl;
+    private final String baseurl;
 
-    public AccountGateway(final RestTemplateBuilder restTemplateBuilder) {
+    public AccountGateway(final RestTemplateBuilder restTemplateBuilder, @Value("${endpoint.starling-url}") String baseurl) {
         restTemplate = restTemplateBuilder.build();
+        this.baseurl = baseurl;
     }
 
     public Account retrieveCustomerAccounts() throws RestClientException {
