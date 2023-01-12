@@ -1,15 +1,5 @@
 package starlingtechchallenge.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static starlingtechchallenge.helpers.DataBuilders.getAccountData;
-import static starlingtechchallenge.helpers.DataBuilders.getAddToSavingsGoalData;
-import static starlingtechchallenge.helpers.DataBuilders.getTransactionFeedData;
-
-import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -22,11 +12,18 @@ import org.springframework.web.client.HttpClientErrorException;
 import starlingtechchallenge.domain.Account;
 import starlingtechchallenge.domain.Amount;
 import starlingtechchallenge.domain.TransactionFeed;
-import starlingtechchallenge.domain.request.GoalAmountRequest;
 import starlingtechchallenge.domain.response.AddToSavingsGoalResponse;
 import starlingtechchallenge.gateway.AccountGateway;
 import starlingtechchallenge.gateway.SavingsGoalGateway;
 import starlingtechchallenge.gateway.TransactionFeedGateway;
+
+import java.time.Instant;
+
+import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static starlingtechchallenge.helpers.DataBuilders.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -63,8 +60,8 @@ public class RoundUpControllerTest {
     when(transactionFeedGateway.getTransactionFeed(ACCOUNT_UID, CATEGORY_UID,
         String.valueOf(changesSince))).thenReturn(transactionFeedResponse);
 
-    when(savingsGoalGateway.addSavingsToGoal(ACCOUNT_UID, SAVINGS_GOAL_UID, new GoalAmountRequest(
-        Amount.builder().currency("GBP").minorUnits(66).build()))).thenReturn(addSavingsGoalResponse);
+    when(savingsGoalGateway.addSavingsToGoal(ACCOUNT_UID, SAVINGS_GOAL_UID,
+        Amount.builder().currency("GBP").minorUnits(66).build())).thenReturn(addSavingsGoalResponse);
 
     mockMvc.perform(get("/round-up/account/" + ACCOUNT_UID + "/goal-id/" + SAVINGS_GOAL_UID + "?changesSince="
             + changesSince)
