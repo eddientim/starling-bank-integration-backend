@@ -37,6 +37,12 @@ I opted to handle the `within a given week` feature by adding the `changesSince`
 
 ``http://localhost:8080/round-up/account/{accountUid}/goal-id/{savingsGoalUid}?changesSince={changesSince}``
 
+### Architecture
+Sequence diagram of service flow
+
+![Sequence diagram](./Sequence diagram.png)
+
+
 ### Further improvements 
 
 For proof of concept I hard coded the `currency` type to be `GBP`. Ideally this should be an enum type with different currency codes. In addition, currency conversion e.g. 
