@@ -7,9 +7,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+import starlingtechchallenge.domain.Account;
 import starlingtechchallenge.domain.Amount;
 import starlingtechchallenge.domain.request.GoalAmountRequest;
+import starlingtechchallenge.domain.request.SavingsGoalRequest;
 import starlingtechchallenge.domain.response.AddToSavingsGoalResponse;
+import starlingtechchallenge.domain.response.AllSavingsGoalDetails;
+import starlingtechchallenge.domain.response.SavingsGoalResponse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,8 +21,10 @@ import java.util.UUID;
 
 import static java.lang.String.format;
 import static org.springframework.http.HttpHeaders.*;
+import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
+import static starlingtechchallenge.utils.StarlingHeaders.getStarlingHeaders;
 
 @Component
 public class SavingsGoalGateway {
@@ -35,6 +41,63 @@ public class SavingsGoalGateway {
         this.bearerToken = bearerToken;
         restTemplate = restTemplateBuilder.build();
     }
+
+    public AllSavingsGoalDetails getAllSavingsGoals(final String accountUid) {
+        try {
+            final HttpHeaders headers = new HttpHeaders();
+            headers.add(ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+            headers.add(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+            headers.add(AUTHORIZATION, format("Bearer %s", bearerToken));
+
+            final HttpEntity<AllSavingsGoalDetails> httpEntity = new HttpEntity<>(null, headers);
+
+            final Map<String, String> urlParams = new HashMap<>();
+            urlParams.put("accountUid", accountUid);
+
+            final String url = fromHttpUrl(baseurl + "/api/v2/account/{accountUid}/savings-goals")
+                    .buildAndExpand(urlParams)
+                    .toUriString();
+
+            ResponseEntity<AllSavingsGoalDetails> response = restTemplate.exchange(url, GET, httpEntity, AllSavingsGoalDetails.class);
+
+            return response.getBody();
+        } catch (HttpClientErrorException ex) {
+            throw new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to perform action due to server error");
+        } catch (ResourceAccessException ex) {
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Invalid amount made");
+        } catch (Exception ex) {
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Invalid url does not exist");
+        }
+    }
+
+    public SavingsGoalResponse createSavingsGoal(final String accountUid, final SavingsGoalRequest requestBody) {
+
+        final HttpHeaders headers = new HttpHeaders();
+        headers.add(ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+        headers.add(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        headers.add(AUTHORIZATION, format("Bearer %s", bearerToken));
+
+        final HttpEntity<SavingsGoalRequest> request = new HttpEntity<>(requestBody, headers);
+
+        final Map<String, String> urlParams = new HashMap<>();
+        urlParams.put("accountUid", accountUid);
+
+        final String url = fromHttpUrl(baseurl + "/api/v2/account/{accountUid}/savings-goals")
+                .buildAndExpand(urlParams)
+                .toUriString();
+
+        try {
+            ResponseEntity<SavingsGoalResponse> response = restTemplate.exchange(url, PUT, request, SavingsGoalResponse.class);
+            return response.getBody();
+        } catch (HttpClientErrorException ex) {
+            throw new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to perform action due to server error");
+        } catch (ResourceAccessException ex) {
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Invalid amount made");
+        } catch (Exception ex) {
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Invalid url does not exist");
+        }
+    }
+
 
     public AddToSavingsGoalResponse addSavingsToGoal(final String accountUid, final String savingsGoalUid, final Amount amount) {
 

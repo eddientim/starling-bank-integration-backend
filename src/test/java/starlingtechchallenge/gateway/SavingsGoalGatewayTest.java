@@ -11,10 +11,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.HttpClientErrorException;
+import starlingtechchallenge.domain.AllSavingsGoalDetail;
 import starlingtechchallenge.domain.Amount;
 import starlingtechchallenge.domain.request.SavingsGoalRequest;
 import starlingtechchallenge.domain.response.AddToSavingsGoalResponse;
+import starlingtechchallenge.domain.response.AllSavingsGoalDetails;
 import starlingtechchallenge.domain.response.SavingsGoalResponse;
+
+import java.util.List;
 
 import static org.hamcrest.Matchers.any;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -30,8 +34,8 @@ import static starlingtechchallenge.helpers.DataBuilders.getAddToSavingsGoalData
 @ActiveProfiles("test")
 public class SavingsGoalGatewayTest {
 
-    private static final String ACCOUNT_UID = "some-account-ui";
-    private static final String SAVING_GOAL_UID = "some-saving-goal-uid";
+    private final String ACCOUNT_UID = "some-account-ui";
+    private final String SAVING_GOAL_UID = "some-saving-goal-uid";
 
     @Autowired
     private SavingsGoalGateway savingsGoalGateway;
@@ -49,9 +53,9 @@ public class SavingsGoalGatewayTest {
     @Test
     public void shouldReturnSuccessfulResponseWhenAddingSavingToGoal() throws Exception {
 
-        String starlingOperationString = objectMapper.writeValueAsString(expectedResponse);
+        String mapper = objectMapper.writeValueAsString(expectedResponse);
         mockRestServiceServer.expect(requestTo(any(String.class)))
-                .andRespond(withSuccess(starlingOperationString, APPLICATION_JSON));
+                .andRespond(withSuccess(mapper, APPLICATION_JSON));
 
         AddToSavingsGoalResponse actualResponse = savingsGoalGateway.addSavingsToGoal(ACCOUNT_UID, SAVING_GOAL_UID, request);
 
@@ -59,7 +63,7 @@ public class SavingsGoalGatewayTest {
     }
 
     @Test
-    void shouldThrow4xxErrorForWhenAddingSavingsToGoal() {
+    void shouldThrow4xxErrorWhenAddingSavingsToGoal() {
         mockRestServiceServer.expect(requestTo(any(String.class))).andRespond(withBadRequest());
 
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
@@ -71,12 +75,99 @@ public class SavingsGoalGatewayTest {
 
 
     @Test
-    void shouldThrow5xxErrorForWhenAddingSavingsToGoal() {
+    void shouldThrow5xxErrorWhenAddingSavingsToGoal() {
         mockRestServiceServer.expect(requestTo(any(String.class))).andRespond(withServerError());
 
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
                 () -> savingsGoalGateway.addSavingsToGoal(ACCOUNT_UID, SAVING_GOAL_UID, request));
 
+
+        Assertions.assertEquals(exception.getStatusCode(), NOT_FOUND);
+        Assertions.assertEquals("404 Invalid url does not exist", exception.getMessage());
+    }
+
+    @Test
+    public void shouldReturnSuccessfulResponseWhenRetrievingAccounts() throws Exception {
+
+        SavingsGoalResponse expectedResponse = SavingsGoalResponse.builder().savingsGoalUid(SAVING_GOAL_UID).build();
+
+        SavingsGoalRequest request = SavingsGoalRequest.builder().build();
+
+        String mapper = objectMapper.writeValueAsString(expectedResponse);
+        mockRestServiceServer.expect(requestTo(any(String.class)))
+                .andRespond(withSuccess(mapper, APPLICATION_JSON));
+
+        SavingsGoalResponse actualResponse = savingsGoalGateway.createSavingsGoal(ACCOUNT_UID, request);
+
+        Assertions.assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    void shouldThrow4xxErrorWhenCreatingAGoal() {
+
+        SavingsGoalRequest request = SavingsGoalRequest.builder().build();
+
+        mockRestServiceServer.expect(requestTo(any(String.class))).andRespond(withBadRequest());
+
+        HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
+                () -> savingsGoalGateway.createSavingsGoal(ACCOUNT_UID, request));
+
+        Assertions.assertEquals(exception.getStatusCode(), INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals("500 Unable to perform action due to server error", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrow5xxErrorWhenCreatingAGoal() {
+
+        SavingsGoalRequest request = SavingsGoalRequest.builder().build();
+
+        mockRestServiceServer.expect(requestTo(any(String.class))).andRespond(withServerError());
+
+        HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
+                () -> savingsGoalGateway.createSavingsGoal(ACCOUNT_UID, request));
+
+
+        Assertions.assertEquals(exception.getStatusCode(), NOT_FOUND);
+        Assertions.assertEquals("404 Invalid url does not exist", exception.getMessage());
+    }
+
+    @Test
+    public void shouldReturnSuccessfulResponseWhenRetrievingSavingsGoals() throws Exception {
+
+        AllSavingsGoalDetails expectedResponse = AllSavingsGoalDetails.builder()
+                .savingsGoalList(List.of(AllSavingsGoalDetail.builder()
+                        .savingsGoalUid(SAVING_GOAL_UID)
+                        .build()))
+                .build();
+
+        String mapper = objectMapper.writeValueAsString(expectedResponse);
+        mockRestServiceServer.expect(requestTo(any(String.class)))
+                .andRespond(withSuccess(mapper, APPLICATION_JSON));
+
+        AllSavingsGoalDetails actualResponse = savingsGoalGateway.getAllSavingsGoals(ACCOUNT_UID);
+
+        Assertions.assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test
+    void shouldThrow4xxErrorWhenRetrievingSavingsGoal() {
+
+        mockRestServiceServer.expect(requestTo(any(String.class))).andRespond(withBadRequest());
+
+        HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
+                () -> savingsGoalGateway.getAllSavingsGoals(ACCOUNT_UID));
+
+        Assertions.assertEquals(exception.getStatusCode(), INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals("500 Unable to perform action due to server error", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrow5xxErrorWhenRetrievingSavingsGoal() {
+
+        mockRestServiceServer.expect(requestTo(any(String.class))).andRespond(withServerError());
+
+        HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
+                () -> savingsGoalGateway.getAllSavingsGoals(ACCOUNT_UID));
 
         Assertions.assertEquals(exception.getStatusCode(), NOT_FOUND);
         Assertions.assertEquals("404 Invalid url does not exist", exception.getMessage());
