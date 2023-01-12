@@ -1,94 +1,83 @@
 package starlingtechchallenge.gateway;
 
 
-import static org.mockito.Mockito.when;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static starlingtechchallenge.helpers.DataBuilders.getAddToSavingsGoalData;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.HttpClientErrorException;
 import starlingtechchallenge.domain.Amount;
-import starlingtechchallenge.domain.request.GoalAmountRequest;
 import starlingtechchallenge.domain.response.AddToSavingsGoalResponse;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+import static org.hamcrest.Matchers.any;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
+import static starlingtechchallenge.helpers.DataBuilders.getAddToSavingsGoalData;
+
+@ExtendWith(SpringExtension.class)
+@RestClientTest(SavingsGoalGateway.class)
+@ActiveProfiles("test")
 public class SavingsGoalGatewayTest {
 
-  private static final String BASE_URL = "http://localhost/api/v2/account/";
-  private static final String ACCOUNT_UID = "some-account-ui";
-  private static final String SAVING_GOAL_UID = "some-saving-goal-uid";
-  private static final String TRANSFER_UID = "some-transfer-uid";
-  private static final String BEARER = "mock-bearer";
+    private static final String ACCOUNT_UID = "some-account-ui";
+    private static final String SAVING_GOAL_UID = "some-saving-goal-uid";
 
-  @MockBean
-  private SavingsGoalGateway savingsGoalGateway;
+    @Autowired
+    private SavingsGoalGateway savingsGoalGateway;
 
-  @Autowired
-  MockMvc mockMvc;
+    @Autowired
+    private MockRestServiceServer mockRestServiceServer;
 
-  @Test
-  public void shouldReturnSuccessfulResponseWhenRetrievingAccounts() throws Exception {
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    AddToSavingsGoalResponse addSavingsGoalResponse = getAddToSavingsGoalData();
+    final AddToSavingsGoalResponse expectedResponse = getAddToSavingsGoalData();
 
-    GoalAmountRequest request = GoalAmountRequest.builder()
-        .amount(Amount.builder().currency("GBP").minorUnits(23).build()).build();
+    final Amount request = Amount.builder().currency("GBP").minorUnits(23).build();
 
-    when(savingsGoalGateway.addSavingsToGoal(ACCOUNT_UID, SAVING_GOAL_UID, request)).thenReturn(
-        addSavingsGoalResponse);
+    @Test
+    public void shouldReturnSuccessfulResponseWhenRetrievingAccounts() throws Exception {
 
-    mockMvc.perform(
-            put(BASE_URL + ACCOUNT_UID + "/savings-goals/" + SAVING_GOAL_UID + "/add-money/" + TRANSFER_UID)
-                .contentType(APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, BEARER)
-                .content(String.valueOf(request))
-                .accept(APPLICATION_JSON))
-        .andExpect(status().isOk());
-  }
+        String starlingOperationString = objectMapper.writeValueAsString(expectedResponse);
+        mockRestServiceServer.expect(requestTo(any(String.class)))
+                .andRespond(withSuccess(starlingOperationString, APPLICATION_JSON));
 
-  @Test
-  public void shouldThrow4xxErrorWhenAccountUrlIsInvalid() throws Exception {
+        AddToSavingsGoalResponse actualResponse = savingsGoalGateway.addSavingsToGoal(ACCOUNT_UID, SAVING_GOAL_UID, request);
 
-    GoalAmountRequest request = GoalAmountRequest.builder()
-        .amount(Amount.builder().currency("GBP").minorUnits(23).build()).build();
+        Assertions.assertEquals(expectedResponse, actualResponse);
+    }
 
-    when(savingsGoalGateway.addSavingsToGoal(ACCOUNT_UID, SAVING_GOAL_UID, request))
-        .thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Invalid request made"));
+    @Test
+    void shouldThrow4xxErrorForWhenAddingSavingsToGoal() {
+        mockRestServiceServer.expect(requestTo(any(String.class))).andRespond(withBadRequest());
 
-    mockMvc.perform(
-            put(BASE_URL + ACCOUNT_UID + "/savings-goals/" + SAVING_GOAL_UID + "/add-money/" + TRANSFER_UID)
-                .contentType(APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, BEARER)
-                .content(String.valueOf(request))
-                .accept(APPLICATION_JSON))
-        .andExpect(status().is4xxClientError());
-  }
+        HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
+                () -> savingsGoalGateway.addSavingsToGoal(ACCOUNT_UID, SAVING_GOAL_UID, request));
 
-  @Test
-  public void shouldThrow5xxErrorWhenAccountForServerErrors() throws Exception {
+        Assertions.assertEquals(exception.getStatusCode(), INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals("500 Unable to perform action due to server error", exception.getMessage());
+    }
 
-    GoalAmountRequest request = GoalAmountRequest.builder()
-        .amount(Amount.builder().currency("GBP").minorUnits(23).build()).build();
 
-    when(savingsGoalGateway.addSavingsToGoal(ACCOUNT_UID, SAVING_GOAL_UID, request))
-        .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to perform action due to server error"));
+    @Test
+    void shouldThrow5xxErrorForWhenAddingSavingsToGoal() {
+        mockRestServiceServer.expect(requestTo(any(String.class))).andRespond(withServerError());
 
-    mockMvc.perform(
-            put(BASE_URL + ACCOUNT_UID + "/savings-goals/" + SAVING_GOAL_UID + "/add-money/" + TRANSFER_UID)
-                .contentType(APPLICATION_JSON)
-                .header(HttpHeaders.AUTHORIZATION, BEARER)
-                .content(String.valueOf(request))
-                .accept(APPLICATION_JSON))
-        .andExpect(status().is5xxServerError());
-  }
+        HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
+                () -> savingsGoalGateway.addSavingsToGoal(ACCOUNT_UID, SAVING_GOAL_UID, request));
+
+
+        Assertions.assertEquals(exception.getStatusCode(), NOT_FOUND);
+        Assertions.assertEquals("404 Invalid url does not exist", exception.getMessage());
+    }
 }
