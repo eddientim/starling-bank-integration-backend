@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: starling-tech-challenge
+
+endpoint:
+  starling-url: http://localhost
+
+starling:
+  bearer-token: mock-bearer
+

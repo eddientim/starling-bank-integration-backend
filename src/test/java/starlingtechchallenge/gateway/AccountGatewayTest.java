@@ -1,60 +1,76 @@
 package starlingtechchallenge.gateway;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static starlingtechchallenge.helpers.DataBuilders.getAccountData;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.HttpClientErrorException;
 import starlingtechchallenge.domain.Account;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+import static org.hamcrest.Matchers.any;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
+import static starlingtechchallenge.helpers.DataBuilders.getAccountData;
+
+@ExtendWith(SpringExtension.class)
+@RestClientTest(AccountGateway.class)
+@ActiveProfiles("test")
+
 public class AccountGatewayTest {
-  private static final String ACCOUNT_UID = "some-account-ui";
-  private static final String BASE_URL = "http://localhost/api/v2/accounts";
 
-  private static final String BEARER = "mock-bearer";
+    @Autowired
+    private AccountGateway accountGateway;
 
-  @MockBean
-  private AccountGateway accountGateway;
-  @Autowired
-  MockMvc mockMvc;
+    @Autowired
+    private MockRestServiceServer mockRestServiceServer;
 
+    @Autowired
+    private ObjectMapper objectMapper;
 
-  @Test
-  public void shouldReturnSuccessfulResponseWhenRetrievingAccounts() throws Exception {
+    final Account accountDataResponse = getAccountData();
 
-    Account accountDataResponse = getAccountData();
+    @Test
+    void shouldReturnASuccessfulResponseWithBody() throws JsonProcessingException {
 
-    when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountDataResponse);
+        String accountsString = objectMapper.writeValueAsString(accountDataResponse);
+        mockRestServiceServer.expect(requestTo(any(String.class)))
+                .andRespond(withSuccess(accountsString, APPLICATION_JSON));
 
-    mockMvc.perform(get(BASE_URL)
-            .contentType(APPLICATION_JSON)
-            .header(HttpHeaders.AUTHORIZATION, BEARER)
-            .accept(APPLICATION_JSON))
-        .andExpect(status().isOk());
+        Account response = accountGateway.retrieveCustomerAccounts();
 
-  }
-  @Test
-  public void shouldThrow4xxErrorWhenAccountUrlIsInvalid() throws Exception {
-    when(accountGateway.retrieveCustomerAccounts()).thenThrow(new HttpClientErrorException(
-        HttpStatus.BAD_REQUEST, "Invalid request made"));
+        Assertions.assertEquals(response, accountDataResponse);
+    }
 
-    mockMvc.perform(get(BASE_URL)
-            .contentType(APPLICATION_JSON)
-            .header(HttpHeaders.AUTHORIZATION, BEARER)
-            .accept(APPLICATION_JSON))
-        .andExpect(status().is4xxClientError());
-  }
+    @Test
+    void shouldThrowA5xxErrorARequest() {
+        mockRestServiceServer.expect(requestTo(any(String.class))).andRespond(withBadRequest());
+
+        HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
+                () -> accountGateway.retrieveCustomerAccounts());
+
+        Assertions.assertEquals(exception.getStatusCode(), INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals("500 Unable to retrieve account info", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrow4xxErrorForARequest() {
+        mockRestServiceServer.expect(requestTo(any(String.class))).andRespond(withServerError());
+
+        HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
+                () -> accountGateway.retrieveCustomerAccounts());
+
+        Assertions.assertEquals(exception.getStatusCode(), NOT_FOUND);
+        Assertions.assertEquals("404 Invalid url does not exist", exception.getMessage());
+    }
 
 }

@@ -1,67 +1,45 @@
 package starlingtechchallenge.gateway;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestTemplate;
 import starlingtechchallenge.domain.Account;
 
-@Component
+import static org.springframework.http.HttpMethod.GET;
+import static starlingtechchallenge.utils.StarlingHeaders.getStarlingHeaders;
+
+@Service
 public class AccountGateway {
 
-  private final ObjectMapper objectMapper;
-  private final WebClient webClient;
-  private final String baseurl;
-  private final String bearerToken;
+    private final RestTemplate restTemplate;
 
-  @Autowired
-  public AccountGateway(final ObjectMapper objectMapper,
-      final WebClient webClient,
-      @Value("${endpoint.starling-url}") final String baseurl,
-      @Value("${starling.bearer-token}") final String bearerToken) {
-    this.objectMapper = objectMapper;
-    this.webClient = webClient;
-    this.baseurl = baseurl;
-    this.bearerToken = bearerToken;
-  }
+    @Value("${endpoint.starling-url}")
+    private String baseurl;
 
-  public Account retrieveCustomerAccounts() throws RestClientException {
-    try {
-      return webClient.get()
-          .uri(baseurl + "/api/v2/accounts")
-          .accept(MediaType.APPLICATION_JSON)
-          .headers(headers -> headers.setBearerAuth(bearerToken))
-          .retrieve()
-          .bodyToMono(String.class)
-          .map(this::transformToResponse)
-          .block();
-    } catch (HttpClientErrorException ex) {
-      throw new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to retrieve account info");
-    } catch (ResourceAccessException ex) {
-      throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Invalid request made");
-    } catch (Exception ex) {
-      throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Invalid url does not exist");
+    public AccountGateway(final RestTemplateBuilder restTemplateBuilder) {
+        restTemplate = restTemplateBuilder.build();
     }
-  }
 
-  protected Account transformToResponse(final String responseBody) {
-    try {
-      objectMapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
-      return objectMapper.readValue(responseBody, Account.class);
-    } catch (JsonProcessingException e) {
-      e.getMessage();
+    public Account retrieveCustomerAccounts() throws RestClientException {
+        HttpEntity<HttpHeaders> headers = getStarlingHeaders();
+
+        try {
+            ResponseEntity<Account> response = restTemplate.exchange(baseurl + "/api/v2/accounts", GET, headers, Account.class);
+            return response.getBody();
+        } catch (HttpClientErrorException ex) {
+            throw new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to retrieve account info");
+        } catch (ResourceAccessException ex) {
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Invalid request made");
+        } catch (Exception ex) {
+            throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Invalid url does not exist");
+        }
     }
-    return null;
-  }
-
-
-
 }
