@@ -12,7 +12,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.HttpClientErrorException;
 import starlingtechchallenge.domain.Amount;
+import starlingtechchallenge.domain.request.SavingsGoalRequest;
 import starlingtechchallenge.domain.response.AddToSavingsGoalResponse;
+import starlingtechchallenge.domain.response.SavingsGoalResponse;
 
 import static org.hamcrest.Matchers.any;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -45,7 +47,7 @@ public class SavingsGoalGatewayTest {
     final Amount request = Amount.builder().currency("GBP").minorUnits(23).build();
 
     @Test
-    public void shouldReturnSuccessfulResponseWhenRetrievingAccounts() throws Exception {
+    public void shouldReturnSuccessfulResponseWhenAddingSavingToGoal() throws Exception {
 
         String starlingOperationString = objectMapper.writeValueAsString(expectedResponse);
         mockRestServiceServer.expect(requestTo(any(String.class)))
