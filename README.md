@@ -37,13 +37,16 @@ I opted to handle the `within a given week` feature by adding the `changesSince`
 
 ``http://localhost:8080/round-up/account/{accountUid}/goal-id/{savingsGoalUid}?changesSince={changesSince}``
 
+A savings goal must to be created hence the `savingsGoalUid` within the path params.  
+
 ### Architecture
 Sequence diagram of service flow
 
-![Sequence diagram](./Sequence diagram.png)
-
+![Sequence diagram](src/main/architecture/Sequence%20diagram%20.png)
 
 ### Further improvements 
+
+I'm aware the `savingGoalUId` can be retrieved from the `getAllSavingsGoals` API to create a savings goal if one doesn't exist. I'm happy to discuss and walk through the implementation of this during the code review. 
 
 For proof of concept I hard coded the `currency` type to be `GBP`. Ideally this should be an enum type with different currency codes. In addition, currency conversion e.g. 
 If the user has made transactions in two different countries the conversion rate can be applied to the round up. 
