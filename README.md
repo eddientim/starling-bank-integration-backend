@@ -35,7 +35,7 @@ Tests can be run with
 ### Endpoint to invoke
 I opted to handle the `within a given week` feature by adding the `changesSince` query parameter in url. The `accountUid` can be found in the sandbox account user response.
 
-``http://localhost:8080/round-up/account/{accountUid}/goal-id/{savingsGoalUid}?changesSince={changesSince}``
+``http://localhost:8080/round-up/account/{accountUid}?changesSince={changesSince}``
 
 A savings goal must to be created hence the `savingsGoalUid` within the path params.  
 
@@ -44,9 +44,7 @@ Sequence diagram of service flow
 
 ![Sequence diagram](architecture/Sequence diagram.png)
 
-### Further improvements 
-
-I'm aware the `savingGoalUId` can be retrieved from the `getAllSavingsGoals` API to create a savings goal if one doesn't exist. I'm happy to discuss and walk through the implementation of this during the code review. 
+### Further improvements  
 
 For proof of concept I hard coded the `currency` type to be `GBP`. Ideally this should be an enum type with different currency codes. In addition, currency conversion e.g. 
 If the user has made transactions in two different countries the conversion rate can be applied to the round up. 
