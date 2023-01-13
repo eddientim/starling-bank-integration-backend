@@ -21,7 +21,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
-import static starlingtechchallenge.helpers.DataBuilders.getTransactionFeedData;
+import static starlingtechchallenge.helpers.DataBuilders.transactionFeedData;
 
 @ExtendWith(SpringExtension.class)
 @RestClientTest(TransactionFeedGateway.class)
@@ -43,7 +43,7 @@ class TransactionFeedGatewayTest {
 
   private final Instant changesSince = Instant.now();
 
-  final TransactionFeed expectedResponse = getTransactionFeedData();
+  final TransactionFeed expectedResponse = transactionFeedData();
 
   @Test
   public void shouldReturnSuccessfulResponseWhenRetrievingTransactions() throws Exception {

@@ -5,11 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import starlingtechchallenge.domain.Account;
-import starlingtechchallenge.domain.AccountDetails;
-import starlingtechchallenge.domain.Amount;
-import starlingtechchallenge.domain.TransactionFeed;
-import starlingtechchallenge.domain.response.AddToSavingsGoalResponse;
+import starlingtechchallenge.domain.*;
+import starlingtechchallenge.domain.request.SavingsGoalRequest;
+import starlingtechchallenge.domain.response.AllSavingsGoalDetails;
+import starlingtechchallenge.domain.response.SavingsGoalResponse;
 import starlingtechchallenge.gateway.AccountGateway;
 import starlingtechchallenge.gateway.SavingsGoalGateway;
 import starlingtechchallenge.gateway.TransactionFeedGateway;
@@ -19,8 +18,7 @@ import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.*;
-import static starlingtechchallenge.helpers.DataBuilders.getAccountData;
-import static starlingtechchallenge.helpers.DataBuilders.getTransactionFeedData;
+import static starlingtechchallenge.helpers.DataBuilders.*;
 
 @SpringBootTest
 public class RoundUpServiceTest {
@@ -32,9 +30,15 @@ public class RoundUpServiceTest {
 
     private final Instant changesSince = Instant.now();
 
-    final Account accountResponse = getAccountData();
+    final Account accountResponse = accountData();
 
-    final TransactionFeed transactionFeedResponse = getTransactionFeedData();
+    final TransactionFeed transactionFeedResponse = transactionFeedData();
+
+    final AllSavingsGoalDetails savingsGoalDetails = allSavingsGoalDetailsData();
+
+    final SavingsGoalRequest savingsGoalRequest = SavingsGoalRequest.builder().build();
+
+    final SavingsGoalResponse savingsGoalResponse = savingsGoalResponse();
 
     @Mock
     private AccountGateway accountGateway;
@@ -56,7 +60,11 @@ public class RoundUpServiceTest {
         when(transactionFeedGateway.getTransactionFeed(accountUid, defaultCategoryUid,
                 String.valueOf(changesSince))).thenReturn(transactionFeedResponse);
 
-        roundUpService.calculateRoundUp(accountUid, savingsGoalUid, String.valueOf(changesSince));
+        when(savingsGoalGateway.getAllSavingsGoals(accountUid)).thenReturn(savingsGoalDetails);
+
+        when(savingsGoalGateway.createSavingsGoal(accountUid, savingsGoalRequest)).thenReturn(savingsGoalResponse);
+
+        roundUpService.calculateRoundUp(accountUid, String.valueOf(changesSince));
 
         verify(transactionFeedGateway)
                 .getTransactionFeed(accountUid, defaultCategoryUid, String.valueOf(changesSince));
@@ -75,7 +83,11 @@ public class RoundUpServiceTest {
         when(transactionFeedGateway.getTransactionFeed(accountUid, defaultCategoryUid,
                 String.valueOf(changesSince))).thenReturn(transactionFeedResponse);
 
-        roundUpService.calculateRoundUp(accountUid, savingsGoalUid, String.valueOf(changesSince));
+        when(savingsGoalGateway.getAllSavingsGoals(accountUid)).thenReturn(savingsGoalDetails);
+
+        when(savingsGoalGateway.createSavingsGoal(accountUid, savingsGoalRequest)).thenReturn(savingsGoalResponse);
+
+        roundUpService.calculateRoundUp(accountUid, String.valueOf(changesSince));
 
         verify(transactionFeedGateway)
                 .getTransactionFeed(accountUid, defaultCategoryUid, String.valueOf(changesSince));
@@ -89,12 +101,13 @@ public class RoundUpServiceTest {
 
         when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountResponse);
 
-        AddToSavingsGoalResponse result = roundUpService
-                .calculateRoundUp(accountUid, savingsGoalUid, String.valueOf(changesSince));
+        AllSavingsGoalDetails result = roundUpService
+                .calculateRoundUp(accountUid, String.valueOf(changesSince));
 
         verifyNoInteractions(transactionFeedGateway);
         verifyNoInteractions(savingsGoalGateway);
 
-        Assertions.assertFalse(result.isSuccess());
+        Assertions.assertNull(result.getSavingsGoalList());
     }
 }
+

@@ -12,7 +12,10 @@ import org.springframework.web.client.HttpClientErrorException;
 import starlingtechchallenge.domain.Account;
 import starlingtechchallenge.domain.Amount;
 import starlingtechchallenge.domain.TransactionFeed;
+import starlingtechchallenge.domain.request.SavingsGoalRequest;
 import starlingtechchallenge.domain.response.AddToSavingsGoalResponse;
+import starlingtechchallenge.domain.response.AllSavingsGoalDetails;
+import starlingtechchallenge.domain.response.SavingsGoalResponse;
 import starlingtechchallenge.gateway.AccountGateway;
 import starlingtechchallenge.gateway.SavingsGoalGateway;
 import starlingtechchallenge.gateway.TransactionFeedGateway;
@@ -29,58 +32,61 @@ import static starlingtechchallenge.helpers.DataBuilders.*;
 @AutoConfigureMockMvc
 public class RoundUpControllerTest {
 
-  @Autowired
-  private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-  private static final String ACCOUNT_UID = "some-account-uid";
-  private static final String SAVINGS_GOAL_UID = "some-saving-goal-uid";
-  private static final String CATEGORY_UID = "some-category-uid";
+    private static final String ACCOUNT_UID = "some-account-uid";
+    private static final String SAVINGS_GOAL_UID = "some-saving-goal-uid";
+    private static final String CATEGORY_UID = "some-category-uid";
+    private final SavingsGoalRequest savingsGoalRequest = SavingsGoalRequest.builder().build();
+    private final SavingsGoalResponse savingsGoalResponse = savingsGoalResponse();
+    private final AllSavingsGoalDetails savingsGoalDetails = allSavingsGoalDetailsData();
+    private final Account accountDataResponse = accountData();
+    private final TransactionFeed transactionFeedResponse = transactionFeedData();
+    private final AddToSavingsGoalResponse addSavingsGoalResponse = addToSavingsGoalData();
 
-  @MockBean
-  private AccountGateway accountGateway;
+    @MockBean
+    private AccountGateway accountGateway;
 
-  @MockBean
-  private TransactionFeedGateway transactionFeedGateway;
+    @MockBean
+    private TransactionFeedGateway transactionFeedGateway;
 
-  @MockBean
-  private SavingsGoalGateway savingsGoalGateway;
+    @MockBean
+    private SavingsGoalGateway savingsGoalGateway;
 
-  @Test
-  public void shouldReturnSuccessfulResponseForRoundUp() throws Exception {
+    @Test
+    public void shouldReturnSuccessfulResponseForRoundUp() throws Exception {
 
-    Account accountDataResponse = getAccountData();
+        Instant changesSince = Instant.parse("2023-01-07T12:34:56.000Z");
 
-    TransactionFeed transactionFeedResponse = getTransactionFeedData();
+        when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountDataResponse);
+        when(transactionFeedGateway.getTransactionFeed(ACCOUNT_UID, CATEGORY_UID,
+                String.valueOf(changesSince))).thenReturn(transactionFeedResponse);
 
-    AddToSavingsGoalResponse addSavingsGoalResponse = getAddToSavingsGoalData();
+        when(savingsGoalGateway.getAllSavingsGoals(ACCOUNT_UID)).thenReturn(savingsGoalDetails);
 
-    Instant changesSince = Instant.parse("2023-01-07T12:34:56.000Z");
+        when(savingsGoalGateway.createSavingsGoal(ACCOUNT_UID, savingsGoalRequest)).thenReturn(savingsGoalResponse);
 
-    when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountDataResponse);
-    when(transactionFeedGateway.getTransactionFeed(ACCOUNT_UID, CATEGORY_UID,
-        String.valueOf(changesSince))).thenReturn(transactionFeedResponse);
+        when(savingsGoalGateway.addSavingsToGoal(ACCOUNT_UID, SAVINGS_GOAL_UID,
+                Amount.builder().currency("GBP").minorUnits(66).build())).thenReturn(addSavingsGoalResponse);
 
-    when(savingsGoalGateway.addSavingsToGoal(ACCOUNT_UID, SAVINGS_GOAL_UID,
-        Amount.builder().currency("GBP").minorUnits(66).build())).thenReturn(addSavingsGoalResponse);
+        mockMvc.perform(get("/round-up/account/" + ACCOUNT_UID + "?changesSince=" + changesSince)
+                .contentType(APPLICATION_JSON)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer mock_token")
+                .accept(APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 
-    mockMvc.perform(get("/round-up/account/" + ACCOUNT_UID + "/goal-id/" + SAVINGS_GOAL_UID + "?changesSince="
-            + changesSince)
-            .contentType(APPLICATION_JSON)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer mock_token")
-            .accept(APPLICATION_JSON))
-        .andExpect(status().isOk());
-  }
+    @Test
+    public void shouldThrow4xxErrorWhenUrlIsInvalid() throws Exception {
 
-  @Test
-  public void shouldThrow4xxErrorWhenUrlIsInvalid() throws Exception {
+        Instant changesSince = Instant.parse("2023-01-07T12:34:56.000Z");
 
-    Instant changesSince = Instant.parse("2023-01-07T12:34:56.000Z");
+        when(accountGateway.retrieveCustomerAccounts()).thenThrow(new HttpClientErrorException(
+                HttpStatus.NOT_FOUND, "Invalid to request"));
 
-    when(accountGateway.retrieveCustomerAccounts()).thenThrow(new HttpClientErrorException(
-        HttpStatus.NOT_FOUND,"Invalid to request"));
-
-    mockMvc.perform(get("/invalid-url/" + ACCOUNT_UID + "?changesSince=" + changesSince)
-            .contentType(APPLICATION_JSON))
-        .andExpect(status().is4xxClientError());
-  }
+        mockMvc.perform(get("/invalid-url/" + ACCOUNT_UID + "?changesSince=" + changesSince)
+                .contentType(APPLICATION_JSON))
+                .andExpect(status().is4xxClientError());
+    }
 }

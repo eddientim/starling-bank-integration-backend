@@ -20,7 +20,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
-import static starlingtechchallenge.helpers.DataBuilders.getAccountData;
+import static starlingtechchallenge.helpers.DataBuilders.accountData;
 
 @ExtendWith(SpringExtension.class)
 @RestClientTest(AccountGateway.class)
@@ -36,7 +36,7 @@ public class AccountGatewayTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    final Account accountDataResponse = getAccountData();
+    final Account accountDataResponse = accountData();
 
     @Test
     void shouldReturnASuccessfulResponseWithBody() throws JsonProcessingException {

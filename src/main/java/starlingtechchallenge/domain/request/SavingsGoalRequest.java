@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import starlingtechchallenge.domain.Amount;
 import starlingtechchallenge.domain.CurrencyAndAmount;
 
 @Data
@@ -14,5 +15,5 @@ public class SavingsGoalRequest {
 
   private String name;
   private String currency;
-  private CurrencyAndAmount currencyAndAmount;
+  private Amount currencyAndAmount;
 }

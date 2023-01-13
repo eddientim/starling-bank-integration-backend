@@ -27,7 +27,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
-import static starlingtechchallenge.helpers.DataBuilders.getAddToSavingsGoalData;
+import static starlingtechchallenge.helpers.DataBuilders.addToSavingsGoalData;
 
 @ExtendWith(SpringExtension.class)
 @RestClientTest(SavingsGoalGateway.class)
@@ -46,7 +46,7 @@ public class SavingsGoalGatewayTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    final AddToSavingsGoalResponse expectedResponse = getAddToSavingsGoalData();
+    final AddToSavingsGoalResponse expectedResponse = addToSavingsGoalData();
 
     final Amount request = Amount.builder().currency("GBP").minorUnits(23).build();
 
