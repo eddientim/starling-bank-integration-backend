@@ -37,8 +37,6 @@ I opted to handle the `within a given week` feature by adding the `changesSince`
 
 ``http://localhost:8080/round-up/account/{accountUid}?changesSince={changesSince}``
 
-A savings goal must to be created hence the `savingsGoalUid` within the path params.  
-
 ### Architecture
 Sequence diagram of service flow
 
