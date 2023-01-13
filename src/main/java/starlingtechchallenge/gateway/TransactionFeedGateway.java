@@ -33,6 +33,14 @@ public class TransactionFeedGateway {
         restTemplate = restTemplateBuilder.build();
     }
 
+    /**
+     * GET request to retrieve all transactions.
+     * @param accountUid
+     * @param categoryUid
+     * @param changesSince
+     * @return TransactionFeed
+     */
+
     public TransactionFeed getTransactionFeed(final String accountUid, final String categoryUid, final String changesSince) {
 
         final HttpHeaders headers = new HttpHeaders();

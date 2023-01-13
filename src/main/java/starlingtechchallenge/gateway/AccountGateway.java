@@ -30,6 +30,12 @@ public class AccountGateway {
         restTemplate = restTemplateBuilder.build();
     }
 
+    /**
+     * GET request to retrieve account holder information
+     * @return Account details
+     * @throws RestClientException
+     */
+
     public Account retrieveCustomerAccounts() throws RestClientException {
 
         final HttpHeaders headers = new HttpHeaders();

@@ -25,6 +25,13 @@ public class RoundUpService {
         this.transactionFeedGateway = transactionFeedGateway;
     }
 
+    /**
+     * Checks if there are any accounts existing. If true, perform round up for out going transactions
+     * @param accountUid
+     * @param changesSince
+     * @return List of transactions for rounded up transactions
+     */
+
     public AllSavingsGoalDetails calculateRoundUp(final String accountUid, final String changesSince) {
         final Account accounts = accountGateway.retrieveCustomerAccounts();
 
@@ -41,6 +48,12 @@ public class RoundUpService {
         return AllSavingsGoalDetails.builder().build();
     }
 
+    /**
+     * Checks if there is a saving goal in list. If savings goal list is empty create a savings goal.
+     * @param accountUid
+     * @param amount
+     * @return a list savings goal
+     */
     private AllSavingsGoalDetails getSavingsGoalDetails(String accountUid, Amount amount) {
         SavingsGoalRequest savingsRequest = SavingsGoalRequest.builder().currencyAndAmount(amount).build();
 
@@ -54,10 +67,20 @@ public class RoundUpService {
         return getAllGoals;
     }
 
+    /**
+     * Retrieve a list of saving goals from gateway
+     * @param accountUid
+     * @return list of saving goals
+     */
     private AllSavingsGoalDetails getSavingsGoalDetails(String accountUid) {
         return savingsGoalGateway.getAllSavingsGoals(accountUid);
     }
 
+    /**
+     * Retrieves a list of transactions out going transactions and calculates savings pot functionality.
+     * @param transactions
+     * @return Remainder
+     */
     private Amount calculateRoundUpForOutGoingTransactions(List<TransactionFeed> transactions) {
         final int sum = transactions.stream()
                 .filter(item -> item.getFeedItems().get(0).getDirection().equals("OUT"))

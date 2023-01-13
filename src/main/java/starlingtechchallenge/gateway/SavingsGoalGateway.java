@@ -42,6 +42,11 @@ public class SavingsGoalGateway {
         restTemplate = restTemplateBuilder.build();
     }
 
+    /**
+     * GET request to retrieving list containing all savings goals for account holder
+     * @param accountUid
+     * @return AllSavingsGoalDetails
+     */
     public AllSavingsGoalDetails getAllSavingsGoals(final String accountUid) {
         try {
             final HttpHeaders headers = new HttpHeaders();
@@ -70,6 +75,12 @@ public class SavingsGoalGateway {
         }
     }
 
+    /**
+     * PUT request to create savings goal
+     * @param accountUid
+     * @param requestBody
+     * @return SavingsGoalResponse
+     */
     public SavingsGoalResponse createSavingsGoal(final String accountUid, final SavingsGoalRequest requestBody) {
 
         final HttpHeaders headers = new HttpHeaders();
@@ -99,6 +110,13 @@ public class SavingsGoalGateway {
     }
 
 
+    /**
+     * PUT request to make a transfer into a savings goal
+     * @param accountUid
+     * @param savingsGoalUid
+     * @param amount
+     * @return AddToSavingsGoalResponse
+     */
     public AddToSavingsGoalResponse addSavingsToGoal(final String accountUid, final String savingsGoalUid, final Amount amount) {
 
         final HttpHeaders headers = new HttpHeaders();

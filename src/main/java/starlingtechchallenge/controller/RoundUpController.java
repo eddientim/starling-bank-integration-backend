@@ -18,6 +18,13 @@ public class RoundUpController {
     this.roundUpService = roundUpService;
   }
 
+
+  /**
+   * This API performs the round up for out going transactions made and transfer
+   * @param accountUid
+   * @param changesSince
+   * @return AllSavingsGoalDetails A list of total out going transactions within a given time frame.
+   */
   @GetMapping(value = "/account/{accountUid}")
   public ResponseEntity<AllSavingsGoalDetails> roundUp(@PathVariable final String accountUid, @RequestParam final String changesSince) {
     AllSavingsGoalDetails response = roundUpService.calculateRoundUp(accountUid, changesSince);
