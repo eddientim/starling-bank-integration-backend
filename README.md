@@ -23,6 +23,8 @@ BEARER_TOKEN=<your_bearer_token>
 
 ### Set up & Build
 
+Environment values must be setup before running the following steps.
+
 Install maven dependencies
 - `mvn install` 
 
