@@ -2,6 +2,7 @@
 
 ### Service requirements 
 - Java 11
+- Maven
 
 ### Environment variables 
 The following env variables need to be setup. The `bearer_token` can be found by generating a refresh token user in sandbox. 
