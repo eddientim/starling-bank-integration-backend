@@ -20,8 +20,9 @@ import starlingtechchallenge.gateway.AccountGateway;
 import starlingtechchallenge.gateway.SavingsGoalGateway;
 import starlingtechchallenge.gateway.TransactionFeedGateway;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 
+import static java.time.OffsetDateTime.now;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -56,12 +57,12 @@ public class RoundUpControllerTest {
 
     @Test
     public void shouldReturnSuccessfulResponseForRoundUp() throws Exception {
-
-        Instant changesSince = Instant.parse("2023-01-07T12:34:56.000Z");
+        OffsetDateTime dateTimeFrom = now();
+        OffsetDateTime dateTimeTo = now();
 
         when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountDataResponse);
-        when(transactionFeedGateway.getTransactionFeed(ACCOUNT_UID, CATEGORY_UID,
-                String.valueOf(changesSince))).thenReturn(transactionFeedResponse);
+        when(transactionFeedGateway.getTransactionFeed(ACCOUNT_UID, CATEGORY_UID, dateTimeFrom, dateTimeTo))
+                .thenReturn(transactionFeedResponse);
 
         when(savingsGoalGateway.getAllSavingsGoals(ACCOUNT_UID)).thenReturn(savingsGoalDetails);
 
@@ -70,7 +71,7 @@ public class RoundUpControllerTest {
         when(savingsGoalGateway.addSavingsToGoal(ACCOUNT_UID, SAVINGS_GOAL_UID,
                 Amount.builder().currency("GBP").minorUnits(66).build())).thenReturn(addSavingsGoalResponse);
 
-        mockMvc.perform(get("/round-up/account/" + ACCOUNT_UID + "?changesSince=" + changesSince)
+        mockMvc.perform(get("/round-up/account/" + ACCOUNT_UID + "?dateTimeFrom=" + dateTimeFrom + "&dateTimeTo=" + dateTimeTo)
                 .contentType(APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer mock_token")
                 .accept(APPLICATION_JSON))
@@ -80,12 +81,10 @@ public class RoundUpControllerTest {
     @Test
     public void shouldThrow4xxErrorWhenUrlIsInvalid() throws Exception {
 
-        Instant changesSince = Instant.parse("2023-01-07T12:34:56.000Z");
-
         when(accountGateway.retrieveCustomerAccounts()).thenThrow(new HttpClientErrorException(
                 HttpStatus.NOT_FOUND, "Invalid to request"));
 
-        mockMvc.perform(get("/invalid-url/" + ACCOUNT_UID + "?changesSince=" + changesSince)
+        mockMvc.perform(get("/invalid-url/" + ACCOUNT_UID)
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().is4xxClientError());
     }

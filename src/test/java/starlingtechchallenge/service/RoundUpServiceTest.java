@@ -5,7 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import starlingtechchallenge.domain.*;
+import starlingtechchallenge.domain.Account;
+import starlingtechchallenge.domain.AccountDetails;
+import starlingtechchallenge.domain.Amount;
+import starlingtechchallenge.domain.TransactionFeed;
 import starlingtechchallenge.domain.request.SavingsGoalRequest;
 import starlingtechchallenge.domain.response.AllSavingsGoalDetails;
 import starlingtechchallenge.domain.response.SavingsGoalResponse;
@@ -13,9 +16,10 @@ import starlingtechchallenge.gateway.AccountGateway;
 import starlingtechchallenge.gateway.SavingsGoalGateway;
 import starlingtechchallenge.gateway.TransactionFeedGateway;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 
+import static java.time.OffsetDateTime.now;
 import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.*;
 import static starlingtechchallenge.helpers.DataBuilders.*;
@@ -28,17 +32,13 @@ public class RoundUpServiceTest {
     private final String defaultCategoryUid = "some-category-uid";
     private final Amount roundUpAmount = Amount.builder().currency("GBP").minorUnits(75).build();
 
-    private final Instant changesSince = Instant.now();
-
-    final Account accountResponse = accountData();
-
-    final TransactionFeed transactionFeedResponse = transactionFeedData();
-
-    final AllSavingsGoalDetails savingsGoalDetails = allSavingsGoalDetailsData();
-
-    final SavingsGoalRequest savingsGoalRequest = SavingsGoalRequest.builder().build();
-
-    final SavingsGoalResponse savingsGoalResponse = savingsGoalResponse();
+    private final OffsetDateTime dateTimeFrom = now();
+    private final OffsetDateTime dateTimeTo = now();
+    private final Account accountResponse = accountData();
+    private final TransactionFeed transactionFeedResponse = transactionFeedData();
+    private final AllSavingsGoalDetails savingsGoalDetails = allSavingsGoalDetailsData();
+    private final SavingsGoalRequest savingsGoalRequest = SavingsGoalRequest.builder().build();
+    private final SavingsGoalResponse savingsGoalResponse = savingsGoalResponse();
 
     @Mock
     private AccountGateway accountGateway;
@@ -58,16 +58,16 @@ public class RoundUpServiceTest {
         when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountResponse);
 
         when(transactionFeedGateway.getTransactionFeed(accountUid, defaultCategoryUid,
-                String.valueOf(changesSince))).thenReturn(transactionFeedResponse);
+                dateTimeFrom, dateTimeTo)).thenReturn(transactionFeedResponse);
 
         when(savingsGoalGateway.getAllSavingsGoals(accountUid)).thenReturn(savingsGoalDetails);
 
         when(savingsGoalGateway.createSavingsGoal(accountUid, savingsGoalRequest)).thenReturn(savingsGoalResponse);
 
-        roundUpService.calculateRoundUp(accountUid, String.valueOf(changesSince));
+        roundUpService.calculateRoundUp(accountUid, dateTimeFrom, dateTimeTo);
 
         verify(transactionFeedGateway)
-                .getTransactionFeed(accountUid, defaultCategoryUid, String.valueOf(changesSince));
+                .getTransactionFeed(accountUid, defaultCategoryUid, dateTimeFrom, dateTimeTo);
 
         verify(savingsGoalGateway).addSavingsToGoal(accountUid, savingsGoalUid, roundUpAmount);
     }
@@ -81,16 +81,16 @@ public class RoundUpServiceTest {
         when(accountGateway.retrieveCustomerAccounts()).thenReturn(multipleAccounts);
 
         when(transactionFeedGateway.getTransactionFeed(accountUid, defaultCategoryUid,
-                String.valueOf(changesSince))).thenReturn(transactionFeedResponse);
+                dateTimeFrom, dateTimeTo)).thenReturn(transactionFeedResponse);
 
         when(savingsGoalGateway.getAllSavingsGoals(accountUid)).thenReturn(savingsGoalDetails);
 
         when(savingsGoalGateway.createSavingsGoal(accountUid, savingsGoalRequest)).thenReturn(savingsGoalResponse);
 
-        roundUpService.calculateRoundUp(accountUid, String.valueOf(changesSince));
+        roundUpService.calculateRoundUp(accountUid, dateTimeFrom, dateTimeTo);
 
         verify(transactionFeedGateway)
-                .getTransactionFeed(accountUid, defaultCategoryUid, String.valueOf(changesSince));
+                .getTransactionFeed(accountUid, defaultCategoryUid, dateTimeFrom, dateTimeTo);
 
         verify(savingsGoalGateway).addSavingsToGoal(accountUid, savingsGoalUid, roundUpAmount);
     }
@@ -101,8 +101,7 @@ public class RoundUpServiceTest {
 
         when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountResponse);
 
-        AllSavingsGoalDetails result = roundUpService
-                .calculateRoundUp(accountUid, String.valueOf(changesSince));
+        AllSavingsGoalDetails result = roundUpService.calculateRoundUp(accountUid, dateTimeFrom, dateTimeTo);
 
         verifyNoInteractions(transactionFeedGateway);
         verifyNoInteractions(savingsGoalGateway);

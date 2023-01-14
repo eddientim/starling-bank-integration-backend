@@ -13,7 +13,9 @@ import org.springframework.web.client.HttpClientErrorException;
 import starlingtechchallenge.domain.TransactionFeed;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
 
+import static java.time.OffsetDateTime.now;
 import static org.hamcrest.Matchers.any;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -28,55 +30,55 @@ import static starlingtechchallenge.helpers.DataBuilders.transactionFeedData;
 @ActiveProfiles("test")
 class TransactionFeedGatewayTest {
 
-  private final String ACCOUNT_UID = "some-account-uid";
+    private final String ACCOUNT_UID = "some-account-uid";
+    private final String CATEGORY_UID = "some-category-uid";
 
-  private final String CATEGORY_UID = "some-category-uid";
+    private final OffsetDateTime dateTimeFrom = now();
+    private final OffsetDateTime dateTimeTo = now();
 
-  @Autowired
-  private TransactionFeedGateway transactionFeedGateway;
+    @Autowired
+    private TransactionFeedGateway transactionFeedGateway;
 
-  @Autowired
-  private MockRestServiceServer mockRestServiceServer;
+    @Autowired
+    private MockRestServiceServer mockRestServiceServer;
 
-  @Autowired
-  private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-  private final Instant changesSince = Instant.now();
+    final TransactionFeed expectedResponse = transactionFeedData();
 
-  final TransactionFeed expectedResponse = transactionFeedData();
+    @Test
+    public void shouldReturnSuccessfulResponseWhenRetrievingTransactions() throws Exception {
+        String feedItemsString = objectMapper.writeValueAsString(expectedResponse);
+        mockRestServiceServer.expect(requestTo(any(String.class)))
+                .andRespond(withSuccess(feedItemsString, APPLICATION_JSON));
 
-  @Test
-  public void shouldReturnSuccessfulResponseWhenRetrievingTransactions() throws Exception {
-    String feedItemsString = objectMapper.writeValueAsString(expectedResponse);
-    mockRestServiceServer.expect(requestTo(any(String.class)))
-            .andRespond(withSuccess(feedItemsString, APPLICATION_JSON));
+        TransactionFeed actualResponse = transactionFeedGateway
+                .getTransactionFeed(ACCOUNT_UID, CATEGORY_UID, dateTimeFrom, dateTimeTo);
 
-    TransactionFeed actualResponse = transactionFeedGateway
-            .getTransactionFeed(ACCOUNT_UID, CATEGORY_UID, String.valueOf(changesSince));
+        Assertions.assertEquals(expectedResponse, actualResponse);
+    }
 
-    Assertions.assertEquals(expectedResponse, actualResponse);
-  }
+    @Test
+    public void shouldThrow5xxErrorWhenRetrievingTransactions() {
+        mockRestServiceServer.expect(requestTo(any(String.class))).andRespond(withBadRequest());
 
-  @Test
-  public void shouldThrow5xxErrorWhenRetrievingTransactions() {
-    mockRestServiceServer.expect(requestTo(any(String.class))).andRespond(withBadRequest());
+        HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
+                () -> transactionFeedGateway.getTransactionFeed(ACCOUNT_UID, CATEGORY_UID, dateTimeFrom, dateTimeTo));
 
-    HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
-            () -> transactionFeedGateway.getTransactionFeed(ACCOUNT_UID, CATEGORY_UID, String.valueOf(changesSince)));
+        Assertions.assertEquals(exception.getStatusCode(), INTERNAL_SERVER_ERROR);
+        Assertions.assertEquals("500 Unable to retrieve transactions info", exception.getMessage());
+    }
 
-    Assertions.assertEquals(exception.getStatusCode(), INTERNAL_SERVER_ERROR);
-    Assertions.assertEquals("500 Unable to retrieve transactions info", exception.getMessage());
-  }
+    @Test
+    public void shouldThrow4xxErrorWhenRetrievingTransactions() {
 
-  @Test
-  public void shouldThrow4xxErrorWhenRetrievingTransactions() {
+        mockRestServiceServer.expect(requestTo(any(String.class))).andRespond(withServerError());
 
-    mockRestServiceServer.expect(requestTo(any(String.class))).andRespond(withServerError());
+        HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
+                () -> transactionFeedGateway.getTransactionFeed(ACCOUNT_UID, CATEGORY_UID, dateTimeFrom, dateTimeTo));
 
-    HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,
-            () -> transactionFeedGateway.getTransactionFeed(ACCOUNT_UID, CATEGORY_UID, String.valueOf(changesSince)));
-
-    Assertions.assertEquals(exception.getStatusCode(), NOT_FOUND);
-    Assertions.assertEquals("404 Invalid url does not exist", exception.getMessage());
-  }
+        Assertions.assertEquals(exception.getStatusCode(), NOT_FOUND);
+        Assertions.assertEquals("404 Invalid url does not exist", exception.getMessage());
+    }
 }

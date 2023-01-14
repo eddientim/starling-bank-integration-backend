@@ -10,6 +10,7 @@ import starlingtechchallenge.gateway.AccountGateway;
 import starlingtechchallenge.gateway.SavingsGoalGateway;
 import starlingtechchallenge.gateway.TransactionFeedGateway;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
@@ -27,17 +28,19 @@ public class RoundUpService {
 
     /**
      * Checks if there are any accounts existing. If true, perform round up for out going transactions
-     * @param accountUid
-     * @param changesSince
+     *
+     * @param accountUid account id
+     * @param dateTimeFrom start date of query
+     * @param dateTimeTo end date of query
      * @return List of transactions for rounded up transactions
      */
 
-    public AllSavingsGoalDetails calculateRoundUp(final String accountUid, final String changesSince) {
+    public AllSavingsGoalDetails calculateRoundUp(final String accountUid, OffsetDateTime dateTimeFrom, OffsetDateTime dateTimeTo) {
         final Account accounts = accountGateway.retrieveCustomerAccounts();
 
         if (!accounts.getAccounts().isEmpty()) {
             final String categoryUid = accounts.getAccounts().get(0).getDefaultCategory();
-            TransactionFeed transactions = transactionFeedGateway.getTransactionFeed(accountUid, categoryUid, changesSince);
+            TransactionFeed transactions = transactionFeedGateway.getTransactionFeed(accountUid, categoryUid, dateTimeFrom, dateTimeTo);
             final Amount amount = calculateRoundUpForOutGoingTransactions(List.of(transactions));
 
             AllSavingsGoalDetails getAllGoals = getSavingsGoalDetails(accountUid, amount);
@@ -50,9 +53,10 @@ public class RoundUpService {
 
     /**
      * Checks if there is a saving goal in list. If savings goal list is empty create a savings goal.
-     * @param accountUid
-     * @param amount
-     * @return a list savings goal
+     *
+     * @param accountUid account id
+     * @param amount Request amount for creating a savings goal
+     * @return a list savings goals
      */
     private AllSavingsGoalDetails getSavingsGoalDetails(String accountUid, Amount amount) {
         SavingsGoalRequest savingsRequest = SavingsGoalRequest.builder().currencyAndAmount(amount).build();
@@ -69,7 +73,8 @@ public class RoundUpService {
 
     /**
      * Retrieve a list of saving goals from gateway
-     * @param accountUid
+     *
+     * @param accountUid account id
      * @return list of saving goals
      */
     private AllSavingsGoalDetails getSavingsGoalDetails(String accountUid) {
@@ -78,8 +83,9 @@ public class RoundUpService {
 
     /**
      * Retrieves a list of transactions out going transactions and calculates savings pot functionality.
-     * @param transactions
-     * @return Remainder
+     *
+     * @param transactions A list of transactions of the account holder
+     * @return The remainder value of the rounded number to the nearest upper Integer
      */
     private Amount calculateRoundUpForOutGoingTransactions(List<TransactionFeed> transactions) {
         final int sum = transactions.stream()
