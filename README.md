@@ -5,7 +5,7 @@
 - Maven
 
 ### Environment variables 
-The following env variables need to be setup. The `bearer_token` can be found by generating a refresh token user in sandbox. 
+The following env variables must be set up before running the test and service. The `bearer_token` can be found by generating a refresh token for the user in sandbox. 
 You can set this in your `.zshrc` `.bash_profile` file or export the following into your terminal.
 
 The `sandbox_api` can be found here - https://developer.starlingbank.com/docs
@@ -29,7 +29,8 @@ Tests can be run with
 - `mvn test`
 
 ### Endpoint to invoke
-I opted to handle the `within a given week` feature by adding the `changesSince` query parameter in url. The `accountUid` can be found in the sandbox account user response.
+I opted to handle the `within a given week` feature by adding the `dateTimeFrom` and `dateTimeTo` 
+query parameters as a part of the url. The `accountUid` can be found in the sandbox account user response.
 
 ``http://localhost:8080/round-up/account/{accountUid}?dateTimeFrom={dateTimeFrom}&dateTimeTo={dateTimeTo}``
 
