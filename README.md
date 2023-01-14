@@ -35,7 +35,7 @@ Tests can be run with
 ### Endpoint to invoke
 I opted to handle the `within a given week` feature by adding the `changesSince` query parameter in url. The `accountUid` can be found in the sandbox account user response.
 
-``http://localhost:8080/round-up/account/{accountUid}?changesSince={changesSince}``
+``http://localhost:8080/round-up/account/{accountUid}?dateTimeFrom={dateTimeFrom}&dateTimeTo={dateTimeTo}``
 
 ### Architecture
 Sequence diagram of service flow
