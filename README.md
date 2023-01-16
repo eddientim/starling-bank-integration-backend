@@ -37,7 +37,9 @@ query parameters as a part of the url. The `accountUid` can be found in the sand
 ### Architecture
 Sequence diagram of service flow
 
-![Sequence diagram](architecture/Sequence diagram.png)
+
+<img width="823" alt="Sequence diagram " src="https://user-images.githubusercontent.com/5974663/212710292-f65097c5-11ee-4331-8ae2-70673a1bc02e.png">
+
 
 ### Further improvements  
 
