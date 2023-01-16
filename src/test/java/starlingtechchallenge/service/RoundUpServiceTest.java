@@ -5,10 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import starlingtechchallenge.domain.Account;
-import starlingtechchallenge.domain.AccountDetails;
-import starlingtechchallenge.domain.Amount;
-import starlingtechchallenge.domain.TransactionFeed;
+import starlingtechchallenge.domain.*;
 import starlingtechchallenge.domain.request.SavingsGoalRequest;
 import starlingtechchallenge.domain.response.AllSavingsGoalDetails;
 import starlingtechchallenge.domain.response.SavingsGoalResponse;
@@ -37,7 +34,7 @@ public class RoundUpServiceTest {
     private final Account accountResponse = accountData();
     private final TransactionFeed transactionFeedResponse = transactionFeedData();
     private final AllSavingsGoalDetails savingsGoalDetails = allSavingsGoalDetailsData();
-    private final SavingsGoalRequest savingsGoalRequest = SavingsGoalRequest.builder().build();
+    private final SavingsGoalRequest savingsGoalRequest = SavingsGoalRequest.builder().name("Joe").currency("GBP").currencyAndAmount(Amount.builder().minorUnits(75).currency("GBP").build()).build();
     private final SavingsGoalResponse savingsGoalResponse = savingsGoalResponse();
 
     @Mock
@@ -62,8 +59,6 @@ public class RoundUpServiceTest {
 
         when(savingsGoalGateway.getAllSavingsGoals(accountUid)).thenReturn(savingsGoalDetails);
 
-        when(savingsGoalGateway.createSavingsGoal(accountUid, savingsGoalRequest)).thenReturn(savingsGoalResponse);
-
         roundUpService.calculateRoundUp(accountUid, dateTimeFrom, dateTimeTo);
 
         verify(transactionFeedGateway)
@@ -85,8 +80,6 @@ public class RoundUpServiceTest {
 
         when(savingsGoalGateway.getAllSavingsGoals(accountUid)).thenReturn(savingsGoalDetails);
 
-        when(savingsGoalGateway.createSavingsGoal(accountUid, savingsGoalRequest)).thenReturn(savingsGoalResponse);
-
         roundUpService.calculateRoundUp(accountUid, dateTimeFrom, dateTimeTo);
 
         verify(transactionFeedGateway)
@@ -107,6 +100,32 @@ public class RoundUpServiceTest {
         verifyNoInteractions(savingsGoalGateway);
 
         Assertions.assertNull(result.getSavingsGoalList());
+    }
+
+    @Test
+    public void shouldNotCalculateRoundUpForInboundTransactions() {
+
+        Amount amount = Amount.builder().currency("GBP").minorUnits(10).build();
+
+        Transaction transactionOut = Transaction.builder()
+                .sourceAmount(SourceAmount.builder().currency("GBP").minorUnits(75).build())
+                .categoryUid(defaultCategoryUid).direction("OUT").amount(
+                        Amount.builder().currency("GBP").minorUnits(25).build()).build();
+
+        Transaction transactionIn = Transaction.builder().counterPartyName("Katy Perry").direction("IN").amount(amount).build();
+
+        TransactionFeed transactions = TransactionFeed.builder().feedItems(List.of(transactionOut, transactionIn))
+                .build();
+
+        when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountResponse);
+
+        when(transactionFeedGateway.getTransactionFeed(accountUid, defaultCategoryUid,
+                dateTimeFrom, dateTimeTo)).thenReturn(transactions);
+
+        when(savingsGoalGateway.getAllSavingsGoals(accountUid)).thenReturn(savingsGoalDetails);
+
+        roundUpService.calculateRoundUp(accountUid, dateTimeFrom, dateTimeTo);
+
     }
 }
 

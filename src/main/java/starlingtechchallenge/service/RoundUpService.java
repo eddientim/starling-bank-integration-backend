@@ -1,6 +1,7 @@
 package starlingtechchallenge.service;
 
 import org.springframework.stereotype.Service;
+import starlingtechchallenge.exception.NoTransactionFoundException;
 import starlingtechchallenge.domain.Account;
 import starlingtechchallenge.domain.Amount;
 import starlingtechchallenge.domain.TransactionFeed;
@@ -29,9 +30,9 @@ public class RoundUpService {
     /**
      * Checks if there are any accounts existing. If true, perform round up for out going transactions
      *
-     * @param accountUid account id
+     * @param accountUid   account id
      * @param dateTimeFrom start date of query
-     * @param dateTimeTo end date of query
+     * @param dateTimeTo   end date of query
      * @return List of transactions for rounded up transactions
      */
 
@@ -43,11 +44,9 @@ public class RoundUpService {
             TransactionFeed transactions = transactionFeedGateway.getTransactionFeed(accountUid, categoryUid, dateTimeFrom, dateTimeTo);
             final Amount amount = calculateRoundUpForOutGoingTransactions(List.of(transactions));
 
-            AllSavingsGoalDetails getAllGoals = getSavingsGoalDetails(accountUid, amount);
-
-            savingsGoalGateway.addSavingsToGoal(accountUid, getAllGoals.getSavingsGoalList().get(0).getSavingsGoalUid(), amount);
-            return getAllGoals;
+            return getSavingsGoalDetails(accountUid, transactions, amount);
         }
+
         return AllSavingsGoalDetails.builder().build();
     }
 
@@ -55,18 +54,22 @@ public class RoundUpService {
      * Checks if there is a saving goal in list. If savings goal list is empty create a savings goal.
      *
      * @param accountUid account id
-     * @param amount Request amount for creating a savings goal
+     * @param amount     Request amount for creating a savings goal
      * @return a list savings goals
      */
-    private AllSavingsGoalDetails getSavingsGoalDetails(String accountUid, Amount amount) {
-        SavingsGoalRequest savingsRequest = SavingsGoalRequest.builder().currencyAndAmount(amount).build();
+    private AllSavingsGoalDetails getSavingsGoalDetails(String accountUid, TransactionFeed transactions, Amount amount) {
+
+        SavingsGoalRequest savingsRequest = SavingsGoalRequest.builder()
+                .name(transactions.getFeedItems().get(0).getCounterPartyName())
+                .currency(transactions.getFeedItems().get(0).getAmount().getCurrency())
+                .currency(amount.getCurrency()).currencyAndAmount(amount).build();
 
         AllSavingsGoalDetails getAllGoals = getSavingsGoalDetails(accountUid);
 
         if (getAllGoals.getSavingsGoalList().isEmpty()) {
             savingsGoalGateway.createSavingsGoal(accountUid, savingsRequest);
         }
-        getAllGoals = getSavingsGoalDetails(accountUid);
+        savingsGoalGateway.addSavingsToGoal(accountUid, getAllGoals.getSavingsGoalList().get(0).getSavingsGoalUid(), amount);
 
         return getAllGoals;
     }
@@ -87,7 +90,11 @@ public class RoundUpService {
      * @param transactions A list of transactions of the account holder
      * @return The remainder value of the rounded number to the nearest upper Integer
      */
-    private Amount calculateRoundUpForOutGoingTransactions(List<TransactionFeed> transactions) {
+    private Amount calculateRoundUpForOutGoingTransactions(List<TransactionFeed> transactions) throws NoTransactionFoundException {
+        if (transactions.get(0).getFeedItems().isEmpty()) {
+            throw new NoTransactionFoundException("No transactions found");
+        }
+
         final int sum = transactions.stream()
                 .filter(item -> item.getFeedItems().get(0).getDirection().equals("OUT"))
                 .mapToInt(item -> item.getFeedItems().get(0).getAmount().getMinorUnits())
