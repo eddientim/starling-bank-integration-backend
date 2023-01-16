@@ -25,7 +25,7 @@ public class DataBuilders {
 
     public static TransactionFeed transactionFeedData() {
         return TransactionFeed.builder()
-                .feedItems(List.of(Transaction.builder()
+                .feedItems(List.of(Transaction.builder().counterPartyName("Blogs")
                         .sourceAmount(SourceAmount.builder().currency("GBP").minorUnits(75).build())
                         .categoryUid(CATEGORY_UID).direction("OUT").amount(
                                 Amount.builder().currency("GBP").minorUnits(25).build()).build())).build();

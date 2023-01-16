@@ -54,7 +54,8 @@ public class RoundUpService {
      * Checks if there is a saving goal in list. If savings goal list is empty create a savings goal.
      *
      * @param accountUid account id
-     * @param amount     Request amount for creating a savings goal
+     * @param amount Request amount for creating a savings goal
+     * @param transactions Transaction information for create savings goal request body
      * @return a list savings goals
      */
     private AllSavingsGoalDetails getSavingsGoalDetails(String accountUid, TransactionFeed transactions, Amount amount) {

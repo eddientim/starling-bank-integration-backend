@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
-import starlingtechchallenge.domain.Account;
 import starlingtechchallenge.domain.Amount;
 import starlingtechchallenge.domain.request.GoalAmountRequest;
 import starlingtechchallenge.domain.request.SavingsGoalRequest;
@@ -24,7 +23,6 @@ import static org.springframework.http.HttpHeaders.*;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.web.util.UriComponentsBuilder.fromHttpUrl;
-import static starlingtechchallenge.utils.StarlingHeaders.getStarlingHeaders;
 
 @Component
 public class SavingsGoalGateway {
@@ -44,7 +42,7 @@ public class SavingsGoalGateway {
 
     /**
      * GET request to retrieving list containing all savings goals for account holder
-     * @param accountUid
+     * @param accountUid Takes account uid
      * @return AllSavingsGoalDetails
      */
     public AllSavingsGoalDetails getAllSavingsGoals(final String accountUid) {
@@ -77,8 +75,8 @@ public class SavingsGoalGateway {
 
     /**
      * PUT request to create savings goal
-     * @param accountUid
-     * @param requestBody
+     * @param accountUid Account id
+     * @param requestBody Request body for creating a savings pot
      * @return SavingsGoalResponse
      */
     public SavingsGoalResponse createSavingsGoal(final String accountUid, final SavingsGoalRequest requestBody) {
@@ -99,6 +97,7 @@ public class SavingsGoalGateway {
 
         try {
             ResponseEntity<SavingsGoalResponse> response = restTemplate.exchange(url, PUT, request, SavingsGoalResponse.class);
+
             return response.getBody();
         } catch (HttpClientErrorException ex) {
             throw new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to perform action due to server error");
@@ -112,9 +111,9 @@ public class SavingsGoalGateway {
 
     /**
      * PUT request to make a transfer into a savings goal
-     * @param accountUid
-     * @param savingsGoalUid
-     * @param amount
+     * @param accountUid Account id
+     * @param savingsGoalUid Savings goal id
+     * @param amount Request body for adding amount to savings goal
      * @return AddToSavingsGoalResponse
      */
     public AddToSavingsGoalResponse addSavingsToGoal(final String accountUid, final String savingsGoalUid, final Amount amount) {
