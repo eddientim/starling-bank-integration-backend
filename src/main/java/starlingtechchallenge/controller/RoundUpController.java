@@ -32,7 +32,7 @@ public class RoundUpController {
      * @param dateTimeTo query of end date
      * @return AllSavingsGoalDetails A list of total out going transactions within a given time frame.
      */
-    @GetMapping(value = "/account/{accountUid}")
+    @GetMapping("/account/{accountUid}")
     public ResponseEntity<AllSavingsGoalDetails> roundUp(@PathVariable final String accountUid,
                                                          @RequestParam("dateTimeFrom") @DateTimeFormat(iso = DATE_TIME) OffsetDateTime dateTimeFrom,
                                                          @RequestParam("dateTimeTo") @DateTimeFormat(iso = DATE_TIME) OffsetDateTime dateTimeTo) {

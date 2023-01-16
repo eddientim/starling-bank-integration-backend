@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import starlingtechchallenge.domain.Amount;
-import starlingtechchallenge.domain.CurrencyAndAmount;
 
 @Data
 @Builder

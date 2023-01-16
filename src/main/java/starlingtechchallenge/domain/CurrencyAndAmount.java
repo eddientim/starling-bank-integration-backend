@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class CurrencyAndAmount {
 
   private String currency;
-  private long minorUnits;
+  private int minorUnits;
 
 }

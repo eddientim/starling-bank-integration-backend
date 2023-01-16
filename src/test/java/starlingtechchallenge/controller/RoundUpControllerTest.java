@@ -1,5 +1,6 @@
 package starlingtechchallenge.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,15 +27,13 @@ import static java.time.OffsetDateTime.now;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static starlingtechchallenge.helpers.DataBuilders.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 public class RoundUpControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
 
     private static final String ACCOUNT_UID = "some-account-uid";
     private static final String SAVINGS_GOAL_UID = "some-saving-goal-uid";
@@ -45,6 +44,12 @@ public class RoundUpControllerTest {
     private final Account accountDataResponse = accountData();
     private final TransactionFeed transactionFeedResponse = transactionFeedData();
     private final AddToSavingsGoalResponse addSavingsGoalResponse = addToSavingsGoalData();
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private MockMvc mockMvc;
 
     @MockBean
     private AccountGateway accountGateway;
@@ -75,7 +80,8 @@ public class RoundUpControllerTest {
                 .contentType(APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer mock_token")
                 .accept(APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().string(objectMapper.writeValueAsString(savingsGoalDetails)));
     }
 
     @Test
