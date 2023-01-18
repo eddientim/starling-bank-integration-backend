@@ -23,7 +23,6 @@ public class RoundUpController {
         this.roundUpService = roundUpService;
     }
 
-
     /**
      * This API performs the round up for out going transactions made and transfer
      *

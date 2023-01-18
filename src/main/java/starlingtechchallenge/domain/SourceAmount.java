@@ -8,5 +8,5 @@ import lombok.Data;
 public class SourceAmount {
 
   private String currency;
-  private int minorUnits;
+  private long minorUnits;
 }
