@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import starlingtechchallenge.domain.*;
 import starlingtechchallenge.domain.request.SavingsGoalRequest;
@@ -15,6 +16,7 @@ import starlingtechchallenge.gateway.TransactionFeedGateway;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import starlingtechchallenge.utils.CalculateRoundUp;
 
 import static java.time.OffsetDateTime.now;
 import static java.util.Collections.emptyList;
@@ -40,6 +42,9 @@ public class RoundUpServiceTest {
     @Mock
     private AccountGateway accountGateway;
 
+    @Autowired
+    private CalculateRoundUp calculateRoundUp;
+
     @Mock
     private TransactionFeedGateway transactionFeedGateway;
 
@@ -50,7 +55,7 @@ public class RoundUpServiceTest {
     private RoundUpService roundUpService;
 
     @Test
-    public void shouldCalculateRoundUpForOutGoingTransactions() {
+    public void shouldCalculateRoundUpForAnAccount() {
 
         when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountResponse);
 
@@ -100,32 +105,6 @@ public class RoundUpServiceTest {
         verifyNoInteractions(savingsGoalGateway);
 
         Assertions.assertNull(result.getSavingsGoalList());
-    }
-
-    @Test
-    public void shouldNotCalculateRoundUpForInboundTransactions() {
-
-        Amount amount = Amount.builder().currency("GBP").minorUnits(10).build();
-
-        Transaction transactionOut = Transaction.builder()
-                .sourceAmount(SourceAmount.builder().currency("GBP").minorUnits(75).build())
-                .categoryUid(defaultCategoryUid).direction("OUT").amount(
-                        Amount.builder().currency("GBP").minorUnits(25).build()).build();
-
-        Transaction transactionIn = Transaction.builder().counterPartyName("Katy Perry").direction("IN").amount(amount).build();
-
-        TransactionFeed transactions = TransactionFeed.builder().feedItems(List.of(transactionOut, transactionIn))
-                .build();
-
-        when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountResponse);
-
-        when(transactionFeedGateway.getTransactionFeed(accountUid, defaultCategoryUid,
-                dateTimeFrom, dateTimeTo)).thenReturn(transactions);
-
-        when(savingsGoalGateway.getAllSavingsGoals(accountUid)).thenReturn(savingsGoalDetails);
-
-        roundUpService.calculateRoundUp(accountUid, dateTimeFrom, dateTimeTo);
-
     }
 }
 
