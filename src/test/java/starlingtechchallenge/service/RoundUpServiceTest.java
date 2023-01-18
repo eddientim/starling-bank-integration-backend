@@ -30,19 +30,16 @@ public class RoundUpServiceTest {
     private final String savingsGoalUid = "some-saving-goal-uid";
     private final String defaultCategoryUid = "some-category-uid";
     private final Amount roundUpAmount = Amount.builder().currency("GBP").minorUnits(75).build();
-
     private final OffsetDateTime dateTimeFrom = now();
     private final OffsetDateTime dateTimeTo = now();
     private final Account accountResponse = accountData();
     private final TransactionFeed transactionFeedResponse = transactionFeedData();
     private final AllSavingsGoalDetails savingsGoalDetails = allSavingsGoalDetailsData();
-    private final SavingsGoalRequest savingsGoalRequest = SavingsGoalRequest.builder().name("Joe").currency("GBP").currencyAndAmount(Amount.builder().minorUnits(75).currency("GBP").build()).build();
-    private final SavingsGoalResponse savingsGoalResponse = savingsGoalResponse();
 
     @Mock
     private AccountGateway accountGateway;
 
-    @Autowired
+    @Mock
     private CalculateRoundUp calculateRoundUp;
 
     @Mock
@@ -64,6 +61,8 @@ public class RoundUpServiceTest {
 
         when(savingsGoalGateway.getAllSavingsGoals(accountUid)).thenReturn(savingsGoalDetails);
 
+        when(calculateRoundUp.roundUp(List.of(transactionFeedResponse))).thenReturn(roundUpAmount);
+
         roundUpService.calculateRoundUp(accountUid, dateTimeFrom, dateTimeTo);
 
         verify(transactionFeedGateway)
@@ -84,6 +83,8 @@ public class RoundUpServiceTest {
                 dateTimeFrom, dateTimeTo)).thenReturn(transactionFeedResponse);
 
         when(savingsGoalGateway.getAllSavingsGoals(accountUid)).thenReturn(savingsGoalDetails);
+
+        when(calculateRoundUp.roundUp(List.of(transactionFeedResponse))).thenReturn(roundUpAmount);
 
         roundUpService.calculateRoundUp(accountUid, dateTimeFrom, dateTimeTo);
 
