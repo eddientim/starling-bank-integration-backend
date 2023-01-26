@@ -1,6 +1,6 @@
 # Starling API integration Backend
-This service retrieves transactions from the starling bank API and adds the remainder for out going 
-transactions to the nearest pound. 
+This service retrieves transactions from the starling bank API and adds the remainder for outgoing 
+transactions to the nearest pound to a savings pot. 
 
 ### Service requirements 
 - Java 11
