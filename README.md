@@ -1,4 +1,4 @@
-# Edward Ntim Starling Tech Challenge
+# Starling API integration
 
 ### Service requirements 
 - Java 11
@@ -29,8 +29,7 @@ Tests can be run with
 - `mvn test`
 
 ### Endpoint to invoke
-I opted to handle the `within a given week` feature by adding the `dateTimeFrom` and `dateTimeTo` 
-query parameters as a part of the url. The `accountUid` can be found in the sandbox account user response.
+The `accountUid` can be found in the sandbox account user response.
 
 ``http://localhost:8080/round-up/account/{accountUid}?dateTimeFrom={dateTimeFrom}&dateTimeTo={dateTimeTo}``
 
@@ -40,12 +39,3 @@ Sequence diagram of service flow
 
 <img width="823" alt="Sequence diagram " src="https://user-images.githubusercontent.com/5974663/212710292-f65097c5-11ee-4331-8ae2-70673a1bc02e.png">
 
-
-### Further improvements  
-
-For proof of concept I hard coded the `currency` type to be `GBP`. Ideally this should be an enum type with different currency codes. In addition, currency conversion e.g. 
-If the user has made transactions in two different countries the conversion rate can be applied to the round up. 
-
-I would include logs for better visibility when the service is running.
-
-Happy to have a discussion about service design and different approaches to the task.
