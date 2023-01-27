@@ -4,19 +4,19 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import starlingtechchallenge.domain.*;
-import starlingtechchallenge.domain.request.SavingsGoalRequest;
+import starlingtechchallenge.domain.Account;
+import starlingtechchallenge.domain.AccountDetails;
+import starlingtechchallenge.domain.Amount;
+import starlingtechchallenge.domain.TransactionFeed;
 import starlingtechchallenge.domain.response.AllSavingsGoalDetails;
-import starlingtechchallenge.domain.response.SavingsGoalResponse;
 import starlingtechchallenge.gateway.AccountGateway;
 import starlingtechchallenge.gateway.SavingsGoalGateway;
 import starlingtechchallenge.gateway.TransactionFeedGateway;
+import starlingtechchallenge.utils.CalculateRoundUp;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import starlingtechchallenge.utils.CalculateRoundUp;
 
 import static java.time.OffsetDateTime.now;
 import static java.util.Collections.emptyList;
