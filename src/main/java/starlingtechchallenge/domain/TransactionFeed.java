@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import starlingtechchallenge.exception.NoTransactionFoundException;
 
 @Data
 @NoArgsConstructor
@@ -13,4 +14,10 @@ import lombok.NoArgsConstructor;
 public class TransactionFeed {
 
   private List<Transaction> feedItems;
+
+  public void noTransactions() {
+    if (feedItems.isEmpty()) {
+      throw new NoTransactionFoundException("No transactions found");
+    }
+  }
 }

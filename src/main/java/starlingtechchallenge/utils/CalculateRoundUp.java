@@ -18,9 +18,7 @@ public class CalculateRoundUp {
    */
   public Amount roundUp(List<TransactionFeed> transactions) throws NoTransactionFoundException {
 
-    if (transactions.get(0).getFeedItems().isEmpty()) {
-      throw new NoTransactionFoundException("No transactions found");
-    }
+    transactions.get(0).noTransactions();
 
     final int sum = transactions.stream()
         .filter(item -> item.getFeedItems().get(0).getDirection().equals("OUT"))
