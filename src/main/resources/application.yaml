@@ -3,8 +3,8 @@ spring:
     name: starling-tech-challenge
 
 endpoint:
-  starling-url: ${STARLING_URL}
+  starling-url: ${STARLING_URL:http://localhost:9090}
 
 starling:
-  bearer-token: ${BEARER_TOKEN}
+  bearer-token: ${BEARER_TOKEN:local-token}
 
