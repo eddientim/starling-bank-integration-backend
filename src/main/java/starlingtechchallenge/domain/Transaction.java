@@ -15,22 +15,6 @@ public class Transaction {
   private Amount amount;
   private SourceAmount sourceAmount;
   private String direction;
-  private String updatedAt;
-  private String settlementTime;
-  private String source;
-  private String status;
-  private String transactingApplicationUserUid;
-  private String counterPartyType;
   private String counterPartyUid;
   private String counterPartyName;
-  private String counterPartySubEntityUid;
-  private String counterPartySubEntityName;
-  private String counterPartySubEntityIdentifier;
-  private String counterPartySubEntitySubIdentifier;
-  private String reference;
-  private String country;
-  private String spendingCategory;
-  private boolean hasAttachment;
-  private boolean hasReceipt;
-  private String batchPaymentDetails;
 }
