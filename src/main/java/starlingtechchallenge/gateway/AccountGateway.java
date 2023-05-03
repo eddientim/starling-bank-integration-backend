@@ -42,7 +42,7 @@ public class AccountGateway {
         headers.add(ACCEPT, MediaType.APPLICATION_JSON_VALUE);
         headers.add(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         headers.add(AUTHORIZATION, format("Bearer %s", bearerToken));
-        final HttpEntity<?> httpEntity = new HttpEntity<>(headers);
+        final HttpEntity<HttpHeaders> httpEntity = new HttpEntity<>(headers);
 
         try {
             ResponseEntity<Account> response = restTemplate.exchange(baseurl + "/api/v2/accounts", GET, httpEntity, Account.class);
