@@ -1,23 +1,26 @@
 package starlingtechchallenge.domain;
 
-import java.util.List;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import starlingtechchallenge.exception.NoTransactionFoundException;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+import java.util.List;
+
 @Builder
 public class TransactionFeed {
 
-  private List<Transaction> feedItems;
+    private List<Transaction> feedItems;
 
-  public void noTransactions() {
-    if (feedItems.isEmpty()) {
-      throw new NoTransactionFoundException("No transactions found");
+    public TransactionFeed(List<Transaction> feedItems) {
+        this.feedItems = feedItems;
     }
-  }
+
+    public void noTransactions() {
+        if (feedItems.isEmpty()) {
+            throw new NoTransactionFoundException("No transactions found");
+        }
+    }
+
+    public List<Transaction> getFeedItems() {
+        return feedItems;
+    }
 }

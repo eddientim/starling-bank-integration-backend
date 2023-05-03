@@ -61,7 +61,7 @@ public class RoundUpServiceTest {
 
         when(savingsGoalGateway.getAllSavingsGoals(accountUid)).thenReturn(savingsGoalDetails);
 
-        when(calculateRoundUp.roundUp(List.of(transactionFeedResponse))).thenReturn(roundUpAmount);
+        when(calculateRoundUp.roundUp(transactionFeedResponse)).thenReturn(roundUpAmount);
 
         roundUpService.calculateRoundUp(accountUid, dateTimeFrom, dateTimeTo);
 
@@ -84,7 +84,7 @@ public class RoundUpServiceTest {
 
         when(savingsGoalGateway.getAllSavingsGoals(accountUid)).thenReturn(savingsGoalDetails);
 
-        when(calculateRoundUp.roundUp(List.of(transactionFeedResponse))).thenReturn(roundUpAmount);
+        when(calculateRoundUp.roundUp(transactionFeedResponse)).thenReturn(roundUpAmount);
 
         roundUpService.calculateRoundUp(accountUid, dateTimeFrom, dateTimeTo);
 

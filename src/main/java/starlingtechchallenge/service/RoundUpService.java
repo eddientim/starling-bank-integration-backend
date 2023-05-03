@@ -45,7 +45,7 @@ public class RoundUpService {
         if (!accounts.getAccounts().isEmpty()) {
             final String categoryUid = accounts.getAccounts().get(0).getDefaultCategory();
             TransactionFeed transactions = transactionFeedGateway.getTransactionFeed(accountUid, categoryUid, dateTimeFrom, dateTimeTo);
-            final Amount amount = calculateRoundUp.roundUp(List.of(transactions));
+            final Amount amount = calculateRoundUp.roundUp(transactions);
 
             return getSavingsGoalDetails(accountUid, transactions, amount);
         }

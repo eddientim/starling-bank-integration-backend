@@ -1,9 +1,5 @@
 package starlingtechchallenge.utils;
 
-import static java.util.Collections.emptyList;
-
-import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +8,11 @@ import starlingtechchallenge.domain.Amount;
 import starlingtechchallenge.domain.Transaction;
 import starlingtechchallenge.domain.TransactionFeed;
 import starlingtechchallenge.exception.NoTransactionFoundException;
+
+import java.util.List;
+
+import static java.util.Collections.emptyList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 public class CalculateRoundUpTest {
@@ -26,8 +27,7 @@ public class CalculateRoundUpTest {
     TransactionFeed feedItems = TransactionFeed.builder().feedItems(List.of(feedItem))
         .build();
 
-    Amount actualAmount = calculateRoundUp.roundUp(
-        Collections.singletonList(feedItems));
+    Amount actualAmount = calculateRoundUp.roundUp(feedItems);
 
     Amount expectedAmount = Amount.builder().currency("GBP").minorUnits(90).build();
 
@@ -35,30 +35,49 @@ public class CalculateRoundUpTest {
   }
 
   @Test
-  public void shouldFilterOutInBoundTransactions() {
+  public void shouldCalculateMultipleTransactions() {
 
-    Amount expectedAmount = Amount.builder().minorUnits(90).build();
+    int expectedAmountTransaction = 90;
+    int expectedAmountTransaction1 = 80;
 
     Transaction outBoundTransaction = Transaction.builder().direction("OUT")
         .amount(Amount.builder().minorUnits(10).build()).build();
+
+    Transaction outBoundTransaction1 = Transaction.builder().direction("OUT")
+            .amount(Amount.builder().minorUnits(20).build()).build();
+
     Transaction inBoundTransaction = Transaction.builder().direction("IN").build();
     Transaction directDebitTransaction = Transaction.builder().direction("DIRECT_DEBIT").build();
 
-    TransactionFeed transactionFeed = new TransactionFeed(
-        List.of(outBoundTransaction, inBoundTransaction, directDebitTransaction));
+    TransactionFeed transactionFeed = new TransactionFeed(List.of(outBoundTransaction, outBoundTransaction1, inBoundTransaction, directDebitTransaction));
 
-    Amount actualAmount = calculateRoundUp.roundUp(
-        Collections.singletonList(transactionFeed));
+    Amount actualAmount = calculateRoundUp.roundUp(transactionFeed);
 
-    Assertions.assertEquals(expectedAmount, actualAmount);
+    Assertions.assertEquals(expectedAmountTransaction, actualAmount.getMinorUnits());
+    Assertions.assertEquals(expectedAmountTransaction1, actualAmount.getMinorUnits());
   }
+
+  @Test
+  public void shouldFilterOutInBoundTransactions() {
+
+    Transaction outBoundTransaction = Transaction.builder().direction("OUT").amount(Amount.builder().minorUnits(10).build()).build();
+    Transaction outBoundTransaction1 = Transaction.builder().direction("OUT").amount(Amount.builder().minorUnits(10).build()).build();
+    Transaction inBoundTransaction = Transaction.builder().direction("IN").build();
+    Transaction directDebitTransaction = Transaction.builder().direction("DIRECT_DEBIT").build();
+
+    TransactionFeed transactions = new TransactionFeed(List.of(outBoundTransaction, outBoundTransaction1, inBoundTransaction, directDebitTransaction));
+
+    calculateRoundUp.roundUp(transactions);
+
+    assertEquals(2, transactions.getFeedItems().size());
+  }
+
 
   @Test
   public void shouldThrowExceptionWhenTransactionListIsEmpty() {
     TransactionFeed emptyFeedItem = TransactionFeed.builder().feedItems(emptyList()).build();
 
     Assertions.assertThrows(NoTransactionFoundException.class,
-        () -> calculateRoundUp.roundUp(
-            Collections.singletonList(emptyFeedItem)));
+        () -> calculateRoundUp.roundUp(emptyFeedItem));
   }
 }
