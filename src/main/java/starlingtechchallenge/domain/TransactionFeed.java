@@ -8,7 +8,7 @@ import java.util.List;
 @Builder
 public class TransactionFeed {
 
-    private List<Transaction> feedItems;
+    private final List<Transaction> feedItems;
 
     public TransactionFeed(List<Transaction> feedItems) {
         this.feedItems = feedItems;
