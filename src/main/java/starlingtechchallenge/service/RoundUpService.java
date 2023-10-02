@@ -1,7 +1,5 @@
 package starlingtechchallenge.service;
 
-import java.time.OffsetDateTime;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import starlingtechchallenge.domain.Account;
 import starlingtechchallenge.domain.Amount;
@@ -12,6 +10,8 @@ import starlingtechchallenge.gateway.AccountGateway;
 import starlingtechchallenge.gateway.SavingsGoalGateway;
 import starlingtechchallenge.gateway.TransactionFeedGateway;
 import starlingtechchallenge.utils.CalculateRoundUp;
+
+import java.time.OffsetDateTime;
 
 @Service
 public class RoundUpService {
@@ -43,9 +43,9 @@ public class RoundUpService {
         final Account accounts = accountGateway.retrieveCustomerAccounts();
 
         if (!accounts.getAccounts().isEmpty()) {
-            final String categoryUid = accounts.getAccounts().get(0).getDefaultCategory();
+            final String categoryUid = accounts.getAccounts().iterator().next().getDefaultCategory();
             TransactionFeed transactions = transactionFeedGateway.getTransactionFeed(accountUid, categoryUid, dateTimeFrom, dateTimeTo);
-            final Amount amount = calculateRoundUp.roundUp(List.of(transactions));
+            final Amount amount = calculateRoundUp.roundUp(transactions);
 
             return getSavingsGoalDetails(accountUid, transactions, amount);
         }

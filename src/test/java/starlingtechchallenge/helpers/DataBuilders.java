@@ -42,8 +42,8 @@ public class DataBuilders {
                         .name("Joe").build()))
                 .build();
     }
+
     public static SavingsGoalResponse savingsGoalResponse() {
         return SavingsGoalResponse.builder().savingsGoalUid(SAVING_GOAL_UID).build();
-
     }
 }

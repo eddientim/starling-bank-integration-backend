@@ -1,10 +1,12 @@
 package starlingtechchallenge.utils;
 
-import java.util.List;
 import org.springframework.stereotype.Service;
 import starlingtechchallenge.domain.Amount;
+import starlingtechchallenge.domain.Transaction;
 import starlingtechchallenge.domain.TransactionFeed;
 import starlingtechchallenge.exception.NoTransactionFoundException;
+
+import java.util.List;
 
 @Service
 public class CalculateRoundUp {
@@ -16,18 +18,31 @@ public class CalculateRoundUp {
    * @param transactions A list of transactions of the account holder
    * @return The remainder value of the rounded number to the nearest upper Integer
    */
-  public Amount roundUp(List<TransactionFeed> transactions) throws NoTransactionFoundException {
+  public Amount roundUp(TransactionFeed transactions) throws NoTransactionFoundException {
 
-    transactions.get(0).noTransactions();
+    transactions.noTransactions();
 
-    final int sum = transactions.stream()
-        .filter(item -> item.getFeedItems().get(0).getDirection().equals("OUT"))
-        .mapToInt(item -> item.getFeedItems().get(0).getAmount().getMinorUnits())
+    if (filterOutGoingTransactions(transactions)) {
+    final int sum = transactions.getFeedItems().stream()
+        .mapToInt(item -> item.getAmount().getMinorUnits())
         .filter(amount -> amount >= 0)
         .map(amount -> 100 - amount % 100)
         .filter(amount -> amount != 100)
         .sum();
-    final String currency = transactions.get(0).getFeedItems().get(0).getAmount().getCurrency();
+    final String currency = getCurrency(transactions.getFeedItems());
     return Amount.builder().currency(currency).minorUnits(sum).build();
+    }
+    return Amount.builder().build();
+  }
+
+  private String getCurrency(List<Transaction> transactions) {
+    return transactions.stream()
+            .findAny()
+            .orElseThrow()
+            .getAmount()
+            .getCurrency();
+  }
+  private boolean filterOutGoingTransactions(TransactionFeed feedItems) {
+     return feedItems.getFeedItems().stream().anyMatch(tr -> tr.getDirection().equalsIgnoreCase("OUT"));
   }
 }
