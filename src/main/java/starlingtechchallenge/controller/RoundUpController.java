@@ -24,12 +24,12 @@ public class RoundUpController {
     }
 
     /**
-     * This API performs the round up for out going transactions made and transfer
+     * This API performs the round up for outgoing transactions made and transfer
      *
      * @param accountUid account holder id
      * @param dateTimeFrom query date start date
      * @param dateTimeTo query of end date
-     * @return AllSavingsGoalDetails A list of total out going transactions within a given time frame.
+     * @return AllSavingsGoalDetails A list of total outgoing transactions within a given time frame.
      */
     @GetMapping("/account/{accountUid}")
     public ResponseEntity<AllSavingsGoalDetails> roundUp(@PathVariable final String accountUid,

@@ -73,7 +73,6 @@ public class RoundUpService {
             savingsGoalGateway.createSavingsGoal(accountUid, savingsRequest);
         }
         savingsGoalGateway.addSavingsToGoal(accountUid, getAllGoals.getSavingsGoalList().get(0).getSavingsGoalUid(), amount);
-
         return getAllGoals;
     }
 

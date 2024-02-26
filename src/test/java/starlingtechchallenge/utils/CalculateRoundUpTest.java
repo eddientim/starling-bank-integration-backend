@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InjectMocks;
 import org.springframework.boot.test.context.SpringBootTest;
 import starlingtechchallenge.domain.Amount;
 import starlingtechchallenge.domain.Transaction;
@@ -16,7 +16,7 @@ import starlingtechchallenge.exception.NoTransactionFoundException;
 @SpringBootTest
 public class CalculateRoundUpTest {
 
-  @Autowired
+  @InjectMocks
   private CalculateRoundUp calculateRoundUp;
 
   @Test

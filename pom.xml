@@ -18,18 +18,12 @@
         <java.version>11</java.version>
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
-
     <dependencies>
 
         <!-- Compile dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-            <version>2.4.6</version>
         </dependency>
 
         <!--Test dependencies-->
@@ -79,7 +73,5 @@
             <version>2.2</version>
             <scope>test</scope>
         </dependency>
-
-
     </dependencies>
 </project>

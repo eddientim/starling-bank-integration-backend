@@ -53,14 +53,9 @@ public class RoundUpServiceTest {
 
     @Test
     public void shouldCalculateRoundUpForAnAccount() {
-
         when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountResponse);
-
-        when(transactionFeedGateway.getTransactionFeed(accountUid, defaultCategoryUid,
-                dateTimeFrom, dateTimeTo)).thenReturn(transactionFeedResponse);
-
+        when(transactionFeedGateway.getTransactionFeed(accountUid, defaultCategoryUid, dateTimeFrom, dateTimeTo)).thenReturn(transactionFeedResponse);
         when(savingsGoalGateway.getAllSavingsGoals(accountUid)).thenReturn(savingsGoalDetails);
-
         when(calculateRoundUp.roundUp(List.of(transactionFeedResponse))).thenReturn(roundUpAmount);
 
         roundUpService.calculateRoundUp(accountUid, dateTimeFrom, dateTimeTo);
@@ -78,19 +73,13 @@ public class RoundUpServiceTest {
         Account multipleAccounts = Account.builder().accounts(List.of(account, account)).build();
 
         when(accountGateway.retrieveCustomerAccounts()).thenReturn(multipleAccounts);
-
-        when(transactionFeedGateway.getTransactionFeed(accountUid, defaultCategoryUid,
-                dateTimeFrom, dateTimeTo)).thenReturn(transactionFeedResponse);
-
+        when(transactionFeedGateway.getTransactionFeed(accountUid, defaultCategoryUid, dateTimeFrom, dateTimeTo)).thenReturn(transactionFeedResponse);
         when(savingsGoalGateway.getAllSavingsGoals(accountUid)).thenReturn(savingsGoalDetails);
-
         when(calculateRoundUp.roundUp(List.of(transactionFeedResponse))).thenReturn(roundUpAmount);
 
         roundUpService.calculateRoundUp(accountUid, dateTimeFrom, dateTimeTo);
 
-        verify(transactionFeedGateway)
-                .getTransactionFeed(accountUid, defaultCategoryUid, dateTimeFrom, dateTimeTo);
-
+        verify(transactionFeedGateway).getTransactionFeed(accountUid, defaultCategoryUid, dateTimeFrom, dateTimeTo);
         verify(savingsGoalGateway).addSavingsToGoal(accountUid, savingsGoalUid, roundUpAmount);
     }
 
