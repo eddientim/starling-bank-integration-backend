@@ -26,8 +26,7 @@ public class CalculateRoundUpTest {
     TransactionFeed feedItems = TransactionFeed.builder().feedItems(List.of(feedItem))
         .build();
 
-    Amount actualAmount = calculateRoundUp.roundUp(
-        Collections.singletonList(feedItems));
+    Amount actualAmount = calculateRoundUp.roundUp(Collections.singletonList(feedItems));
 
     Amount expectedAmount = Amount.builder().currency("GBP").minorUnits(90).build();
 
@@ -36,19 +35,16 @@ public class CalculateRoundUpTest {
 
   @Test
   public void shouldFilterOutInBoundTransactions() {
-
     Amount expectedAmount = Amount.builder().minorUnits(90).build();
 
-    Transaction outBoundTransaction = Transaction.builder().direction("OUT")
-        .amount(Amount.builder().minorUnits(10).build()).build();
+    Transaction outBoundTransaction = Transaction.builder().direction("OUT").amount(Amount.builder().minorUnits(10).build()).build();
     Transaction inBoundTransaction = Transaction.builder().direction("IN").build();
     Transaction directDebitTransaction = Transaction.builder().direction("DIRECT_DEBIT").build();
 
     TransactionFeed transactionFeed = new TransactionFeed(
         List.of(outBoundTransaction, inBoundTransaction, directDebitTransaction));
 
-    Amount actualAmount = calculateRoundUp.roundUp(
-        Collections.singletonList(transactionFeed));
+    Amount actualAmount = calculateRoundUp.roundUp(Collections.singletonList(transactionFeed));
 
     Assertions.assertEquals(expectedAmount, actualAmount);
   }
@@ -57,8 +53,7 @@ public class CalculateRoundUpTest {
   public void shouldThrowExceptionWhenTransactionListIsEmpty() {
     TransactionFeed emptyFeedItem = TransactionFeed.builder().feedItems(emptyList()).build();
 
-    Assertions.assertThrows(NoTransactionFoundException.class,
-        () -> calculateRoundUp.roundUp(
+    Assertions.assertThrows(NoTransactionFoundException.class, () -> calculateRoundUp.roundUp(
             Collections.singletonList(emptyFeedItem)));
   }
 }

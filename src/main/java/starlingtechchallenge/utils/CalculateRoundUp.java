@@ -1,10 +1,13 @@
 package starlingtechchallenge.utils;
 
-import java.util.List;
 import org.springframework.stereotype.Service;
 import starlingtechchallenge.domain.Amount;
+import starlingtechchallenge.domain.Transaction;
 import starlingtechchallenge.domain.TransactionFeed;
 import starlingtechchallenge.exception.NoTransactionFoundException;
+
+import java.util.List;
+import java.util.function.Supplier;
 
 @Service
 public class CalculateRoundUp {
@@ -18,16 +21,30 @@ public class CalculateRoundUp {
    */
   public Amount roundUp(List<TransactionFeed> transactions) throws NoTransactionFoundException {
 
-    transactions.get(0).noTransactions();
+    if (transactions.isEmpty()) {
+      throw new NoTransactionFoundException("No transactions found");
+    }
 
     final int sum = transactions.stream()
-        .filter(item -> item.getFeedItems().get(0).getDirection().equals("OUT"))
-        .mapToInt(item -> item.getFeedItems().get(0).getAmount().getMinorUnits())
+        .filter(item -> filterOutDirections(item.getFeedItems()))
+        .mapToInt(item -> getUnit(item.getFeedItems()))
         .filter(amount -> amount >= 0)
         .map(amount -> 100 - amount % 100)
         .filter(amount -> amount != 100)
         .sum();
     final String currency = transactions.get(0).getFeedItems().get(0).getAmount().getCurrency();
     return Amount.builder().currency(currency).minorUnits(sum).build();
+  }
+
+  private boolean filterOutDirections(List<Transaction> transactions) {
+    return transactions.stream().findAny().orElseThrow(getNoTransactionsFound()).getDirection().equals("OUT");
+  }
+
+  private int getUnit(List<Transaction> transactions) {
+    return transactions.stream().findAny().orElseThrow(getNoTransactionsFound()).getAmount().getMinorUnits();
+  }
+
+  private static Supplier<NoTransactionFoundException> getNoTransactionsFound() {
+    return () -> new NoTransactionFoundException("No transactions found");
   }
 }
