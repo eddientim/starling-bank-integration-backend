@@ -4,11 +4,9 @@ package starlingtechchallenge.gateway;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.HttpClientErrorException;
 import starlingtechchallenge.domain.AllSavingsGoalDetail;
@@ -29,10 +27,9 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 import static starlingtechchallenge.helpers.DataBuilders.addToSavingsGoalData;
 
-@ExtendWith(SpringExtension.class)
 @RestClientTest(SavingsGoalGateway.class)
 @ActiveProfiles("test")
-public class SavingsGoalGatewayTest {
+public class SavingsGoalGatewayIT {
 
     private final String ACCOUNT_UID = "some-account-ui";
     private final String SAVING_GOAL_UID = "some-saving-goal-uid";
@@ -43,8 +40,7 @@ public class SavingsGoalGatewayTest {
     @Autowired
     private MockRestServiceServer mockRestServiceServer;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     final AddToSavingsGoalResponse expectedResponse = addToSavingsGoalData();
 
@@ -53,7 +49,7 @@ public class SavingsGoalGatewayTest {
     @Test
     public void shouldReturnSuccessfulResponseWhenAddingSavingToGoal() throws Exception {
 
-        String mapper = objectMapper.writeValueAsString(expectedResponse);
+        String mapper = OBJECT_MAPPER.writeValueAsString(expectedResponse);
         mockRestServiceServer.expect(requestTo(any(String.class)))
                 .andRespond(withSuccess(mapper, APPLICATION_JSON));
 
@@ -93,7 +89,7 @@ public class SavingsGoalGatewayTest {
 
         SavingsGoalRequest request = SavingsGoalRequest.builder().build();
 
-        String mapper = objectMapper.writeValueAsString(expectedResponse);
+        String mapper = OBJECT_MAPPER.writeValueAsString(expectedResponse);
         mockRestServiceServer.expect(requestTo(any(String.class)))
                 .andRespond(withSuccess(mapper, APPLICATION_JSON));
 
@@ -140,7 +136,7 @@ public class SavingsGoalGatewayTest {
                         .build()))
                 .build();
 
-        String mapper = objectMapper.writeValueAsString(expectedResponse);
+        String mapper = OBJECT_MAPPER.writeValueAsString(expectedResponse);
         mockRestServiceServer.expect(requestTo(any(String.class)))
                 .andRespond(withSuccess(mapper, APPLICATION_JSON));
 
