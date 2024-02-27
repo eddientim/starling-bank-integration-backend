@@ -1,7 +1,5 @@
 package starlingtechchallenge.service;
 
-import java.time.OffsetDateTime;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import starlingtechchallenge.domain.Account;
 import starlingtechchallenge.domain.Amount;
@@ -12,6 +10,9 @@ import starlingtechchallenge.gateway.AccountGateway;
 import starlingtechchallenge.gateway.SavingsGoalGateway;
 import starlingtechchallenge.gateway.TransactionFeedGateway;
 import starlingtechchallenge.utils.CalculateRoundUp;
+
+import java.time.OffsetDateTime;
+import java.util.List;
 
 @Service
 public class RoundUpService {
@@ -49,7 +50,7 @@ public class RoundUpService {
 
             return getSavingsGoalDetails(accountUid, transactions, amount);
         }
-        return AllSavingsGoalDetails.builder().build();
+        return new AllSavingsGoalDetails();
     }
 
     /**
@@ -61,13 +62,9 @@ public class RoundUpService {
      * @return a list savings goals
      */
     private AllSavingsGoalDetails getSavingsGoalDetails(String accountUid, TransactionFeed transactions, Amount amount) {
+        SavingsGoalRequest savingsRequest = new SavingsGoalRequest(getCounterPartyName(transactions), amount.getCurrency(), amount);
 
-        SavingsGoalRequest savingsRequest = SavingsGoalRequest.builder()
-                .name(transactions.getFeedItems().get(0).getCounterPartyName())
-                .currency(transactions.getFeedItems().get(0).getAmount().getCurrency())
-                .currency(amount.getCurrency()).currencyAndAmount(amount).build();
-
-        AllSavingsGoalDetails getAllGoals = getSavingsGoalDetails(accountUid);
+        AllSavingsGoalDetails getAllGoals = savingsGoalGateway.getAllSavingsGoals(accountUid);
 
         if (getAllGoals.getSavingsGoalList().isEmpty()) {
             savingsGoalGateway.createSavingsGoal(accountUid, savingsRequest);
@@ -76,13 +73,7 @@ public class RoundUpService {
         return getAllGoals;
     }
 
-    /**
-     * Retrieve a list of saving goals from gateway
-     *
-     * @param accountUid account id
-     * @return list of saving goals
-     */
-    private AllSavingsGoalDetails getSavingsGoalDetails(String accountUid) {
-        return savingsGoalGateway.getAllSavingsGoals(accountUid);
+    private String getCounterPartyName(TransactionFeed transaction) {
+        return transaction.getFeedItems().stream().findAny().orElseThrow().getCounterPartyName();
     }
 }
