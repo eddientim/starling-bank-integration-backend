@@ -123,7 +123,7 @@ public class SavingsGoalGateway {
         headers.add(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         headers.add(AUTHORIZATION, format("Bearer %s", bearerToken));
 
-        GoalAmountRequest addToSavingsGoalRequest = GoalAmountRequest.builder().amount(amount).build();
+        GoalAmountRequest addToSavingsGoalRequest = new GoalAmountRequest(amount);
 
         final HttpEntity<GoalAmountRequest> request = new HttpEntity<>(addToSavingsGoalRequest, headers);
 

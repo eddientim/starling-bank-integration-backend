@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import starlingtechchallenge.domain.Account;
-import starlingtechchallenge.domain.AccountDetails;
 import starlingtechchallenge.domain.Amount;
 import starlingtechchallenge.domain.TransactionFeed;
 import starlingtechchallenge.domain.response.AllSavingsGoalDetails;
@@ -19,9 +18,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static java.time.OffsetDateTime.now;
-import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.*;
-import static starlingtechchallenge.helpers.DataBuilders.*;
+import static starlingtechchallenge.helpers.Fixtures.*;
 
 @SpringBootTest
 public class RoundUpServiceTest {
@@ -29,12 +27,12 @@ public class RoundUpServiceTest {
     private final String accountUid = "some-account-uid";
     private final String savingsGoalUid = "some-saving-goal-uid";
     private final String defaultCategoryUid = "some-category-uid";
-    private final Amount roundUpAmount = Amount.builder().currency("GBP").minorUnits(75).build();
+    private final Amount roundUpAmount = amountFixture();
     private final OffsetDateTime dateTimeFrom = now();
     private final OffsetDateTime dateTimeTo = now();
-    private final Account accountResponse = accountData();
-    private final TransactionFeed transactionFeedResponse = transactionFeedData();
-    private final AllSavingsGoalDetails savingsGoalDetails = allSavingsGoalDetailsData();
+    private final Account accountResponse = accountFixture();
+    private final TransactionFeed transactionFeedResponse = transactionFeedFixture();
+    private final AllSavingsGoalDetails savingsGoalDetails = allSavingsGoalDetailsFixture();
 
     @Mock
     private AccountGateway accountGateway;
@@ -60,17 +58,13 @@ public class RoundUpServiceTest {
 
         roundUpService.calculateRoundUp(accountUid, dateTimeFrom, dateTimeTo);
 
-        verify(transactionFeedGateway)
-                .getTransactionFeed(accountUid, defaultCategoryUid, dateTimeFrom, dateTimeTo);
-
+        verify(transactionFeedGateway).getTransactionFeed(accountUid, defaultCategoryUid, dateTimeFrom, dateTimeTo);
         verify(savingsGoalGateway).addSavingsToGoal(accountUid, savingsGoalUid, roundUpAmount);
     }
 
     @Test
     public void shouldCalculateRoundUpForMultipleAccounts() {
-
-        AccountDetails account = AccountDetails.builder().defaultCategory(defaultCategoryUid).build();
-        Account multipleAccounts = Account.builder().accounts(List.of(account, account)).build();
+        Account multipleAccounts = accountFixture();
 
         when(accountGateway.retrieveCustomerAccounts()).thenReturn(multipleAccounts);
         when(transactionFeedGateway.getTransactionFeed(accountUid, defaultCategoryUid, dateTimeFrom, dateTimeTo)).thenReturn(transactionFeedResponse);
@@ -85,15 +79,13 @@ public class RoundUpServiceTest {
 
     @Test
     void shouldNotCalculateRoundUpWhenAccountDoesNotExist() {
-        Account accountResponse = Account.builder().accounts(emptyList()).build();
-
-        when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountResponse);
+        Account emptyAccount = new Account();
+        when(accountGateway.retrieveCustomerAccounts()).thenReturn(emptyAccount);
 
         AllSavingsGoalDetails result = roundUpService.calculateRoundUp(accountUid, dateTimeFrom, dateTimeTo);
 
         verifyNoInteractions(transactionFeedGateway);
         verifyNoInteractions(savingsGoalGateway);
-
         Assertions.assertNull(result.getSavingsGoalList());
     }
 }

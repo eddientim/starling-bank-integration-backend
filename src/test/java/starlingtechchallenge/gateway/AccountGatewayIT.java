@@ -18,7 +18,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
-import static starlingtechchallenge.helpers.DataBuilders.accountData;
+import static starlingtechchallenge.helpers.Fixtures.accountFixture;
 
 @RestClientTest(AccountGateway.class)
 @ActiveProfiles("test")
@@ -31,7 +31,7 @@ public class AccountGatewayIT {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    final Account accountDataResponse = accountData();
+    final Account accountDataResponse = accountFixture();
 
     @Test
     void shouldReturnASuccessfulResponseWithBody() throws JsonProcessingException {

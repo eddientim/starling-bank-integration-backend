@@ -20,7 +20,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
-import static starlingtechchallenge.helpers.DataBuilders.transactionFeedData;
+import static starlingtechchallenge.helpers.Fixtures.transactionFeedFixture;
 
 @RestClientTest(TransactionFeedGateway.class)
 @ActiveProfiles("test")
@@ -28,7 +28,6 @@ class TransactionFeedGatewayIT {
 
     private final String ACCOUNT_UID = "some-account-uid";
     private final String CATEGORY_UID = "some-category-uid";
-
     private final OffsetDateTime dateTimeFrom = now();
     private final OffsetDateTime dateTimeTo = now();
 
@@ -38,18 +37,15 @@ class TransactionFeedGatewayIT {
     private MockRestServiceServer mockRestServiceServer;
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    final TransactionFeed expectedResponse = transactionFeedData();
-
     @Test
     public void shouldReturnSuccessfulResponseWhenRetrievingTransactions() throws Exception {
-        String feedItemsString = OBJECT_MAPPER.writeValueAsString(expectedResponse);
-        mockRestServiceServer.expect(requestTo(any(String.class)))
-                .andRespond(withSuccess(feedItemsString, APPLICATION_JSON));
+        TransactionFeed transactionFeed = transactionFeedFixture();
+        String feedItemsString = OBJECT_MAPPER.writeValueAsString(transactionFeed);
+        mockRestServiceServer.expect(requestTo(any(String.class))).andRespond(withSuccess(feedItemsString, APPLICATION_JSON));
 
-        TransactionFeed actualResponse = transactionFeedGateway
-                .getTransactionFeed(ACCOUNT_UID, CATEGORY_UID, dateTimeFrom, dateTimeTo);
+        TransactionFeed actualResponse = transactionFeedGateway.getTransactionFeed(ACCOUNT_UID, CATEGORY_UID, dateTimeFrom, dateTimeTo);
 
-        Assertions.assertEquals(expectedResponse, actualResponse);
+        Assertions.assertEquals(transactionFeed, actualResponse);
     }
 
     @Test
@@ -65,7 +61,6 @@ class TransactionFeedGatewayIT {
 
     @Test
     public void shouldThrow4xxErrorWhenRetrievingTransactions() {
-
         mockRestServiceServer.expect(requestTo(any(String.class))).andRespond(withServerError());
 
         HttpClientErrorException exception = assertThrows(HttpClientErrorException.class,

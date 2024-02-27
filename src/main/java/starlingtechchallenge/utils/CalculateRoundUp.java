@@ -33,7 +33,7 @@ public class CalculateRoundUp {
         .filter(amount -> amount != 100)
         .sum();
     final String currency = transactions.get(0).getFeedItems().get(0).getAmount().getCurrency();
-    return Amount.builder().currency(currency).minorUnits(sum).build();
+    return new Amount(currency, sum);
   }
 
   private boolean filterOutDirections(List<Transaction> transactions) {

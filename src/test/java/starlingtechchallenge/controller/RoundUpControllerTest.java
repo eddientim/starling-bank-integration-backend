@@ -13,9 +13,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.HttpClientErrorException;
 import starlingtechchallenge.domain.Account;
 import starlingtechchallenge.domain.Amount;
-import starlingtechchallenge.domain.TransactionFeed;
-import starlingtechchallenge.domain.request.SavingsGoalRequest;
-import starlingtechchallenge.domain.response.AddToSavingsGoalResponse;
 import starlingtechchallenge.domain.response.AllSavingsGoalDetails;
 import starlingtechchallenge.domain.response.SavingsGoalResponse;
 import starlingtechchallenge.gateway.AccountGateway;
@@ -31,7 +28,8 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static starlingtechchallenge.helpers.DataBuilders.*;
+import static starlingtechchallenge.helpers.Fixtures.*;
+import static starlingtechchallenge.helpers.Fixtures.allSavingsGoalDetailsFixture;
 
 @SpringBootTest
 public class RoundUpControllerTest {
@@ -39,14 +37,8 @@ public class RoundUpControllerTest {
     private static final String ACCOUNT_UID = "some-account-uid";
     private static final String SAVINGS_GOAL_UID = "some-saving-goal-uid";
     private static final String CATEGORY_UID = "some-category-uid";
-    private final SavingsGoalRequest savingsGoalRequest = SavingsGoalRequest.builder().build();
-    private final SavingsGoalResponse savingsGoalResponse = savingsGoalResponse();
-    private final AllSavingsGoalDetails savingsGoalDetails = allSavingsGoalDetailsData();
-    private final Account accountDataResponse = accountData();
-    private final TransactionFeed transactionFeedResponse = transactionFeedData();
-    private final AddToSavingsGoalResponse addSavingsGoalResponse = addToSavingsGoalData();
-
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     private MockMvc mockMvc;
     @Mock
     private AccountGateway accountGateway;
@@ -71,30 +63,28 @@ public class RoundUpControllerTest {
     public void shouldReturnSuccessfulResponseForRoundUp() throws Exception {
         OffsetDateTime dateTimeFrom = now();
         OffsetDateTime dateTimeTo = now();
+        Account accountDataResponse = accountFixture();
+        Amount amount = amountFixture();
+        AllSavingsGoalDetails allSavingsGoalDetails = allSavingsGoalDetailsFixture();
 
         when(accountGateway.retrieveCustomerAccounts()).thenReturn(accountDataResponse);
-        when(transactionFeedGateway.getTransactionFeed(ACCOUNT_UID, CATEGORY_UID, dateTimeFrom, dateTimeTo))
-                .thenReturn(transactionFeedResponse);
-
-        when(savingsGoalGateway.getAllSavingsGoals(ACCOUNT_UID)).thenReturn(savingsGoalDetails);
-        when(savingsGoalGateway.createSavingsGoal(ACCOUNT_UID, savingsGoalRequest)).thenReturn(savingsGoalResponse);
-        when(savingsGoalGateway.addSavingsToGoal(ACCOUNT_UID, SAVINGS_GOAL_UID,
-                Amount.builder().currency("GBP").minorUnits(66).build())).thenReturn(addSavingsGoalResponse);
-        when(roundUpService.calculateRoundUp(ACCOUNT_UID, dateTimeFrom, dateTimeTo)).thenReturn(savingsGoalDetails);
+        when(transactionFeedGateway.getTransactionFeed(ACCOUNT_UID, CATEGORY_UID, dateTimeFrom, dateTimeTo)).thenReturn(transactionFeedFixture());
+        when(savingsGoalGateway.getAllSavingsGoals(ACCOUNT_UID)).thenReturn(allSavingsGoalDetails);
+        when(savingsGoalGateway.createSavingsGoal(ACCOUNT_UID, savingsGoalRequestFixture())).thenReturn(new SavingsGoalResponse(SAVINGS_GOAL_UID));
+        when(savingsGoalGateway.addSavingsToGoal(ACCOUNT_UID, SAVINGS_GOAL_UID, amount)).thenReturn(addToSavingsGoalResponseFixture());
+        when(roundUpService.calculateRoundUp(ACCOUNT_UID, dateTimeFrom, dateTimeTo)).thenReturn(allSavingsGoalDetails);
 
         mockMvc.perform(get("/round-up/account/" + ACCOUNT_UID + "?dateTimeFrom=" + dateTimeFrom + "&dateTimeTo=" + dateTimeTo)
                 .contentType(APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer mock_token")
                 .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string(OBJECT_MAPPER.writeValueAsString(savingsGoalDetails)));
+                .andExpect(content().string(OBJECT_MAPPER.writeValueAsString(allSavingsGoalDetails)));
     }
 
     @Test
     public void shouldThrow4xxErrorWhenUrlIsInvalid() throws Exception {
-
-        when(accountGateway.retrieveCustomerAccounts()).thenThrow(new HttpClientErrorException(
-                HttpStatus.NOT_FOUND, "Invalid to request"));
+        when(accountGateway.retrieveCustomerAccounts()).thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND, "Invalid to request"));
 
         mockMvc.perform(get("/invalid-url/" + ACCOUNT_UID)
                 .contentType(APPLICATION_JSON))
