@@ -1,6 +1,6 @@
 package starlingtechchallenge.utils;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import starlingtechchallenge.domain.Amount;
 import starlingtechchallenge.domain.Transaction;
 import starlingtechchallenge.domain.TransactionFeed;
@@ -9,11 +9,11 @@ import starlingtechchallenge.exception.NoTransactionFoundException;
 import java.util.List;
 import java.util.function.Supplier;
 
-@Service
+@Component
 public class CalculateRoundUp {
 
   /**
-   * Retrieves a list of transactions out going transactions and calculates savings pot
+   * Retrieves a list of transactions outgoing transactions and calculates savings pot
    * functionality.
    *
    * @param transactions A list of transactions of the account holder
@@ -32,6 +32,7 @@ public class CalculateRoundUp {
         .map(amount -> 100 - amount % 100)
         .filter(amount -> amount != 100)
         .sum();
+
     final String currency = transactions.get(0).getFeedItems().get(0).getAmount().getCurrency();
     return new Amount(currency, sum);
   }

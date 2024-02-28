@@ -1,7 +1,10 @@
 package starlingtechchallenge.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import starlingtechchallenge.domain.Account;
+import starlingtechchallenge.domain.AllSavingsGoalDetail;
 import starlingtechchallenge.domain.Amount;
 import starlingtechchallenge.domain.TransactionFeed;
 import starlingtechchallenge.domain.request.SavingsGoalRequest;
@@ -16,6 +19,8 @@ import java.util.List;
 
 @Service
 public class RoundUpService {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(RoundUpService.class);
 
     private final AccountGateway accountGateway;
     private final SavingsGoalGateway savingsGoalGateway;
@@ -44,9 +49,13 @@ public class RoundUpService {
         final Account accounts = accountGateway.retrieveCustomerAccounts();
 
         if (!accounts.getAccounts().isEmpty()) {
+            LOGGER.info("Retrieved accounts [{}]", accounts.getAccounts());
+
             final String categoryUid = accounts.getAccounts().get(0).getDefaultCategory();
             TransactionFeed transactions = transactionFeedGateway.getTransactionFeed(accountUid, categoryUid, dateTimeFrom, dateTimeTo);
             final Amount amount = calculateRoundUp.roundUp(List.of(transactions));
+
+            LOGGER.info("Calculated round up for accountUid {} amount {}", accountUid, amount);
 
             return getSavingsGoalDetails(accountUid, transactions, amount);
         }
@@ -69,11 +78,16 @@ public class RoundUpService {
         if (getAllGoals.getSavingsGoalList().isEmpty()) {
             savingsGoalGateway.createSavingsGoal(accountUid, savingsRequest);
         }
-        savingsGoalGateway.addSavingsToGoal(accountUid, getAllGoals.getSavingsGoalList().get(0).getSavingsGoalUid(), amount);
+        savingsGoalGateway.addSavingsToGoal(accountUid, getSavingGoal(getAllGoals.getSavingsGoalList()), amount);
+        LOGGER.info("Retrieving saving goals for accountUid {} savingGoalUid [{}] and amount {}", accountUid, getAllGoals.getSavingsGoalList(), amount);
         return getAllGoals;
     }
 
     private String getCounterPartyName(TransactionFeed transaction) {
         return transaction.getFeedItems().stream().findAny().orElseThrow().getCounterPartyName();
+    }
+
+    private String getSavingGoal(List<AllSavingsGoalDetail> savingsGoalDetails) {
+        return savingsGoalDetails.stream().findAny().orElseThrow().getSavingsGoalUid();
     }
 }

@@ -1,5 +1,6 @@
 package starlingtechchallenge.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,7 @@ import starlingtechchallenge.service.RoundUpService;
 import java.time.OffsetDateTime;
 
 import static java.time.OffsetDateTime.now;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -79,7 +81,9 @@ public class RoundUpControllerTest {
                 .header(HttpHeaders.AUTHORIZATION, "Bearer mock_token")
                 .accept(APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string(OBJECT_MAPPER.writeValueAsString(allSavingsGoalDetails)));
+                .andExpect(content().string(json(allSavingsGoalDetails)));
+
+        verify(roundUpService).calculateRoundUp(ACCOUNT_UID, dateTimeFrom, dateTimeTo);
     }
 
     @Test
@@ -91,7 +95,11 @@ public class RoundUpControllerTest {
                 .andExpect(status().is4xxClientError());
     }
 
-    protected Object getRoundUpController() {
+    private Object getRoundUpController() {
         return roundUpController;
+    }
+
+    private String json(Object response) throws JsonProcessingException {
+        return OBJECT_MAPPER.writeValueAsString(response);
     }
 }
