@@ -33,11 +33,9 @@ public class AccountGateway {
     /**
      * GET request to retrieve account holder information
      * @return Account details
-     * @throws RestClientException
      */
 
     public Account retrieveCustomerAccounts() throws RestClientException {
-
         final HttpHeaders headers = new HttpHeaders();
         headers.add(ACCEPT, MediaType.APPLICATION_JSON_VALUE);
         headers.add(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);

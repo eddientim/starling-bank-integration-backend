@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Transaction {
+
   private String feedItemUid;
   private String categoryUid;
   private Amount amount;

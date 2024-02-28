@@ -80,7 +80,6 @@ public class SavingsGoalGateway {
      * @return SavingsGoalResponse
      */
     public SavingsGoalResponse createSavingsGoal(final String accountUid, final SavingsGoalRequest requestBody) {
-
         final HttpHeaders headers = new HttpHeaders();
         headers.add(ACCEPT, MediaType.APPLICATION_JSON_VALUE);
         headers.add(CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);

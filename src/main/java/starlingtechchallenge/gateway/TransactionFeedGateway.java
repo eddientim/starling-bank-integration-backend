@@ -44,9 +44,9 @@ public class TransactionFeedGateway {
      * @return TransactionFeed
      */
 
-    public TransactionFeed getTransactionFeed(final String accountUid, final String categoryUid, OffsetDateTime minTransactionTimestamp,
-                                                         OffsetDateTime maxTransactionTimestamp) {
-
+    public TransactionFeed getTransactionFeed(final String accountUid, final String categoryUid,
+                                              OffsetDateTime minTransactionTimestamp,
+                                              OffsetDateTime maxTransactionTimestamp) {
         final HttpHeaders headers = new HttpHeaders();
         headers.add(ACCEPT, APPLICATION_JSON_VALUE);
         headers.add(CONTENT_TYPE, APPLICATION_JSON_VALUE);

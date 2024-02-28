@@ -7,5 +7,4 @@ public class AddToSavingsGoalResponse {
 
   private String transferUid;
   private boolean success;
-
 }
