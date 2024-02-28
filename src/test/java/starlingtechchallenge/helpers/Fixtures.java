@@ -85,6 +85,4 @@ public class Fixtures {
         savingsGoalRequest.setCurrencyAndAmount(amountFixture());
         return savingsGoalRequest;
     }
-
-
 }

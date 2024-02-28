@@ -3,7 +3,7 @@ This service retrieves transactions from the starling bank API and adds the rema
 transactions to the nearest pound to a savings pot. 
 
 ### Service requirements 
-- Java 11
+- Java 17
 - Maven
 
 ### Environment variables 
