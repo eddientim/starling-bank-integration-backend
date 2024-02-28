@@ -46,6 +46,7 @@ public class RoundUpService {
      * @return List of transactions for rounded up transactions
      */
     public AllSavingsGoalDetails calculateRoundUp(final String accountUid, OffsetDateTime dateTimeFrom, OffsetDateTime dateTimeTo) {
+        LOGGER.info("Retrieving account info for account {}", accountUid);
         final Account accounts = accountGateway.retrieveCustomerAccounts();
 
         if (!accounts.getAccounts().isEmpty()) {
