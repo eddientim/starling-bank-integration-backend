@@ -18,6 +18,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static java.time.OffsetDateTime.now;
+import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.*;
 import static starlingtechchallenge.helpers.Fixtures.*;
 
@@ -36,13 +37,10 @@ public class RoundUpServiceTest {
 
     @Mock
     private AccountGateway accountGateway;
-
     @Mock
     private CalculateRoundUp calculateRoundUp;
-
     @Mock
     private TransactionFeedGateway transactionFeedGateway;
-
     @Mock
     private SavingsGoalGateway savingsGoalGateway;
 
@@ -79,7 +77,7 @@ public class RoundUpServiceTest {
 
     @Test
     void shouldNotCalculateRoundUpWhenAccountDoesNotExist() {
-        Account emptyAccount = new Account();
+        Account emptyAccount = new Account(emptyList());
         when(accountGateway.retrieveCustomerAccounts()).thenReturn(emptyAccount);
 
         AllSavingsGoalDetails result = roundUpService.calculateRoundUp(accountUid, dateTimeFrom, dateTimeTo);

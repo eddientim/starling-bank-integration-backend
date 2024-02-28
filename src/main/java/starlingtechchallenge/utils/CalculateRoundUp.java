@@ -26,7 +26,7 @@ public class CalculateRoundUp {
     }
 
     final int sum = transactions.stream()
-        .filter(item -> filterOutDirections(item.getFeedItems()))
+        .filter(item -> filterOutDirection(item.getFeedItems()))
         .mapToInt(item -> getUnit(item.getFeedItems()))
         .filter(amount -> amount >= 0)
         .map(amount -> 100 - amount % 100)
@@ -36,7 +36,7 @@ public class CalculateRoundUp {
     return new Amount(currency, sum);
   }
 
-  private boolean filterOutDirections(List<Transaction> transactions) {
+  private boolean filterOutDirection(List<Transaction> transactions) {
     return transactions.stream().findAny().orElseThrow(getNoTransactionsFound()).getDirection().equals("OUT");
   }
 
